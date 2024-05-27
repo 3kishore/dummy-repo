@@ -1,10 +1,24 @@
 const express = require('express');
 const app = express();
+require('dotenv').config();
+require('./db');
+const PORT = process.env.PORT || 8080;
+const productRoutes = require('./routes/productRoutes');
+const userRoutes = require('./routes/userRoutes');
+app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.send('Hello from kishore sample app')
+    res.send('products api running new deploy');
 });
 
-var port = process.env.PORT || 3000;
+app.get('/ping', (req, res) => {
+    res.send('PONG')
+});
+// /products
+app.use('/products', productRoutes);
+// /users
+app.use('/users', userRoutes);
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(8080, () => {
+    console.log('Server is listenin on PORT :' + PORT);
+})
