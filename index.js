@@ -5,7 +5,7 @@ require('./db');
 const PORT = process.env.PORT || 8080;
 const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
-const admin_approval = require('./controllers/Admin_Approval')
+const admin_approval = require('./routes/adminApprovalRoutes')
 app.use(express.json());
 
 app.get('/', (req, res) => {
