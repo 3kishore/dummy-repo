@@ -12,7 +12,7 @@ const viedoCoontroller = require('./controllers/Video');
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.send('products api running new deploy - 10');
+    res.send('products api running new deploy - 11');
 });
 
 app.get('/ping', (req, res) => {

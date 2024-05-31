@@ -18,7 +18,7 @@
 // module.exports = connectdb;
 
 const mongoose = require('mongoose');
-const dbHOST = process.env.DBHOST;
+const dbHOST = process.env.ConnectionString;
 
 mongoose.connect(dbHOST)
     .then(() => {
