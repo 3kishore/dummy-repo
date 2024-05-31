@@ -1,12 +1,12 @@
 const express = require('express');
 const admin_approval = require('../Schema/Admin');
-const router = express.Router();
+const admin_approval = express.Router();
 const excel = require('../middleware/Excel');
 const authGuard = require('../middleware/auth-middleware');
 const Employee = require('../Schema/Employee');
 const Orders = require('../Schema/Orders');
 
-router.post('/request-to-add-member',authGuard,async(req,res)=>{
+admin_approval.post('/request-to-add-member',authGuard,async(req,res)=>{
     try{
         const new_approval = await admin_approval.create(req.body)
         new_approval.IsApproved = false;
@@ -19,7 +19,7 @@ router.post('/request-to-add-member',authGuard,async(req,res)=>{
     }
 })
 
-router.post('/reject-member',authGuard,async(req,res)=>{
+admin_approval.post('/reject-member',authGuard,async(req,res)=>{
     try {
         const empcode= req.body.empCode;
         const reject = await admin_approval.deleteOne({"empCode":empcode})
@@ -35,7 +35,7 @@ router.post('/reject-member',authGuard,async(req,res)=>{
 
 )
 
-router.get('/get-request-list',authGuard,async(req,res)=>{
+admin_approval.get('/get-request-list',authGuard,async(req,res)=>{
     try{
         const requests = await admin_approval.find({IsApproved:false})
         res.status(200).json({"status":true,"message":"success","content":requests})
@@ -45,7 +45,7 @@ router.get('/get-request-list',authGuard,async(req,res)=>{
     }
 })
 
-router.post('/upload-sales-data',async(req,res)=>{
+admin_approval.post('/upload-sales-data',async(req,res)=>{
     try{
         excel.importData();
         res.status(200).json({"status":true,"message":"success","content":null})
@@ -55,7 +55,7 @@ router.post('/upload-sales-data',async(req,res)=>{
     }
 })
 
-router.get('/get-admin-direct-employees',authGuard,async(req,res)=>{
+admin_approval.get('/get-admin-direct-employees',authGuard,async(req,res)=>{
     try{
         const requests = await Employee.find({"appliedFor":{ $in: ['zonal-head', 'pdm'] }},{"_id":0,"empCode":1,"personalInfo":{"name":1,"mobileNo":1},"address.current.postOffice":1,"points":1})
         res.status(200).json({"status":true,"message":"success","content":requests})
@@ -65,7 +65,7 @@ router.get('/get-admin-direct-employees',authGuard,async(req,res)=>{
     }
 })
 
-router.post('/my-Team-sales-points', async (req, res) => {
+admin_approval.post('/my-Team-sales-points', async (req, res) => {
     try {
         const date = new Date(req.body.date);
         const nextDate = new Date(date);
@@ -157,4 +157,4 @@ router.post('/my-Team-sales-points', async (req, res) => {
     }
 });
 
-module.exports = router;
+module.exports = admin_approval;
