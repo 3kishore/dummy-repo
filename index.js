@@ -2,14 +2,13 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 require('dotenv').config();
-const connectDB = require('./db');
+require('./db');
 
 const PORT = process.env.PORT || 8080;
 
 const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
 const admin_approval = require('./conrollers/Admin_Approval')
-connectDB()
 
 app.use(cors());
 app.use(express.json());
