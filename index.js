@@ -3,27 +3,21 @@ const app = express();
 require('dotenv').config();
 require('./db');
 const PORT = process.env.PORT || 8080;
-const productRoutes = require('./routes/productRoutes');
-const userRoutes = require('./routes/userRoutes');
-const admin_approval = require('./conrollers/Admin_Approval');
-const authorize = require('./conrollers/auth');
+const admin_approval = require('./controllers/Admin_Approval');
+const authorize = require('./controllers/auth');
 
-const employeeController = require('./conrollers/Employee');
-const tdsController = require('./conrollers/TDS');
-const viedoCoontroller = require('./conrollers/Video');
+const employeeController = require('./controllers/Employee');
+const tdsController = require('./controllers/TDS');
+const viedoCoontroller = require('./controllers/Video');
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.send('products api running new deploy - 8');
+    res.send('products api running new deploy - 10');
 });
 
 app.get('/ping', (req, res) => {
     res.send('PONG')
 });
-// /products
-app.use('/products', productRoutes);
-// /users
-app.use('/users', userRoutes);
 
 app.use('/admin',admin_approval)
 
