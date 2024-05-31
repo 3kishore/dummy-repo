@@ -5,7 +5,8 @@ require('./db');
 const PORT = process.env.PORT || 8080;
 const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
-const admin_approval = require('./conrollers/Admin_Approval')
+const admin_approval = require('./conrollers/Admin_Approval');
+const authorize = require('./conrollers/auth')
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -21,6 +22,8 @@ app.use('/products', productRoutes);
 app.use('/users', userRoutes);
 
 app.use('/admin',admin_approval)
+
+app.use('/auth',authorize)
 
 app.listen(8080, () => {
     console.log('Server is listenin on PORT :' + PORT);
