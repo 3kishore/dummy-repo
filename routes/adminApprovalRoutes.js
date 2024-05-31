@@ -1,7 +1,7 @@
-const { adminApproval_method } = require('../conrollers/Admin_Approval');
+// const { adminApproval_method } = require('../conrollers/Admin_Approval');
 
-const router = require('express').Router();
+// const router = require('express').Router();
 
-router.post('/request-to-add-member', adminApproval_method);
+// router.post('/request-to-add-member', adminApproval_method);
 
-module.exports = router
+// module.exports = router

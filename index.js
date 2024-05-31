@@ -5,11 +5,11 @@ require('./db');
 const PORT = process.env.PORT || 8080;
 const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
-const admin_approval = require('./routes/adminApprovalRoutes')
+const admin_approval = require('./conrollers/Admin_Approval')
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.send('products api running new deploy - 4');
+    res.send('products api running new deploy - 8');
 });
 
 app.get('/ping', (req, res) => {
