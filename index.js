@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-// var cors = require('cors');
+var cors = require('cors');
 require('dotenv').config();
 require('./db');
 
@@ -12,7 +12,7 @@ const employeeController = require('./controllers/Employee');
 const tdsController = require('./controllers/TDS');
 const viedoCoontroller = require('./controllers/Video');
 
-// app.use(cors());
+app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
