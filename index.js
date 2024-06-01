@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-var cors = require('cors');
+const cors = require('cors');
 require('dotenv').config();
 require('./db');
 
@@ -12,17 +12,25 @@ const employeeController = require('./controllers/Employee');
 const tdsController = require('./controllers/TDS');
 const viedoCoontroller = require('./controllers/Video');
 
-const allowedOrigin = 'https://pimaths-sales-monitoring-dashboard.vercel.app'; // Replace with your allowed domain
+const allowedOrigins = ['https://pimaths-sales-monitoring-dashboard.vercel.app', 'http://localhost:4900'];
 
 // Configure CORS options
 const corsOptions = {
-  origin: allowedOrigin,
+  origin: function (origin, callback) {
+    // Allow requests with no origin, like mobile apps or curl requests
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true, // Enable Access-Control-Allow-Credentials
+  credentials: true,
   optionsSuccessStatus: 204 // Some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
-// Use CORS middleware with the specified options
+// Use the CORS middleware with options
 app.use(cors(corsOptions));
 
 app.use(express.json());
