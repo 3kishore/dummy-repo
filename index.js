@@ -12,7 +12,19 @@ const employeeController = require('./controllers/Employee');
 const tdsController = require('./controllers/TDS');
 const viedoCoontroller = require('./controllers/Video');
 
-app.use(cors());
+const allowedOrigin = 'https://pimaths-sales-monitoring-dashboard.vercel.app'; // Replace with your allowed domain
+
+// Configure CORS options
+const corsOptions = {
+  origin: allowedOrigin,
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true, // Enable Access-Control-Allow-Credentials
+  optionsSuccessStatus: 204 // Some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
+// Use CORS middleware with the specified options
+app.use(cors(corsOptions));
+
 app.use(express.json());
 
 app.get('/', (req, res) => {
