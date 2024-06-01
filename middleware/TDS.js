@@ -38,7 +38,7 @@ class Excel {
   
     };
 
-      this.addUser(rowIns);
+     await this.addUser(rowIns);
       // this.updateUser(rowIns);
     }
     console.log('Users Done!');
@@ -65,7 +65,10 @@ class Excel {
     );
   }
 
-  addUser(rowIns) {
+  async addUser(rowIns) {
+        const result  = await Users.find({"empCode": rowIns.empCode,"dateOfPayout": rowIns.dateOfPayout})
+        console.log(result.length);
+        if(result.length == 0){
         const userIns = new Users({
           empCode: rowIns.empCode,
           dateOfPayout : rowIns.dateOfPayout,
@@ -79,6 +82,7 @@ class Excel {
 
         });
     userIns.save();
+      }
   }
 }
 

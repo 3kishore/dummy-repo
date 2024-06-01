@@ -43,14 +43,18 @@ class Excel {
         empCode: range[`AL${row}`] ? range[`AL${row}`].w : '',
     };
 
-      this.addUser(rowIns);
+     await this.addUser(rowIns);
       // this.updateUser(rowIns);
     }
     console.log('Users Done!');
   }
 
 
-  addUser(rowIns) {
+  async addUser(rowIns) {
+
+    const result = await Users.find({"empCode": rowIns.empCode,"orderNo": rowIns.orderNo})
+    console.log(result.length);
+    if (result.length == 0){
     const points = Number(rowIns.orderTotal/250)
     let orderDate = new Date(rowIns.orderDate)
 
@@ -74,6 +78,7 @@ class Excel {
 
         });
     userIns.save();
+      }
   }
 }
 
