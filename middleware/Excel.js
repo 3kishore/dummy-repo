@@ -53,7 +53,6 @@ class Excel {
   addUser(rowIns) {
     const points = Number(rowIns.orderTotal/250)
     let orderDate = new Date(rowIns.orderDate)
-    console.log(orderDate.getTime())
 
         const userIns = new Users({
           orderNo: rowIns.orderNo,

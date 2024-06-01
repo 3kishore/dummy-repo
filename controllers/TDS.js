@@ -6,7 +6,7 @@ const router = express.Router();
 
 const authGuard = require('../middleware/auth-middleware');
 
-router.post('/upload-employee-tds',async(req,res)=>{
+router.post('/upload-employee-payout',async(req,res)=>{
     try{
         excel.importData();
         res.status(200).json({"status":true,"message":"success","content":null})
@@ -16,7 +16,7 @@ router.post('/upload-employee-tds',async(req,res)=>{
     }
 })
 
-router.get('/get-my-tds-report',authGuard,async(req,res)=>{
+router.get('/get-my-payout-report',authGuard,async(req,res)=>{
     try{
         const myTDS = await tds.find({empCode:req.query.empCode}).exec()
         res.status(200).json({"status":true,"message":"success","content":myTDS})

@@ -1,10 +1,10 @@
 const express = require('express');
 const admin_approval = require('../Schema/Admin');
+const router = express.Router();
 const excel = require('../middleware/Excel');
 const authGuard = require('../middleware/auth-middleware');
 const Employee = require('../Schema/Employee');
 const Orders = require('../Schema/Orders');
-const router = express.Router();
 
 router.post('/request-to-add-member',authGuard,async(req,res)=>{
     try{
@@ -18,20 +18,6 @@ router.post('/request-to-add-member',authGuard,async(req,res)=>{
         res.status(500).json({"status":false,"message":"Failed","content":null})
     }
 })
-
-
-const adminApproval_method = async (req, res) => {
-    try{
-        const new_approval = await admin_approval.create(req.body)
-        new_approval.IsApproved = false;
-        const saved_approval = await new_approval.save()
-        res.status(200).json({"status":true,"message":"success","content":null})
-
-    }
-    catch(err){
-        res.status(500).json({"status":false,"message":"Failed","content":null})
-    }
-}
 
 router.post('/reject-member',authGuard,async(req,res)=>{
     try {
@@ -59,10 +45,12 @@ router.get('/get-request-list',authGuard,async(req,res)=>{
     }
 })
 
-router.post('/upload-sales-data',async(req,res)=>{
+router.post('/upload-sales-data',authGuard,async(req,res)=>{
     try{
         excel.importData();
+       // await referedPersonEmpCode()
         res.status(200).json({"status":true,"message":"success","content":null})
+        
     }
     catch(err){
         res.status(500).json({"status":false,"message":"Failed","content":null})
@@ -78,6 +66,7 @@ router.get('/get-admin-direct-employees',authGuard,async(req,res)=>{
         res.status(500).json({"status":false,"message":"Failed","content":null})
     }
 })
+
 
 router.post('/my-Team-sales-points', async (req, res) => {
     try {
@@ -170,5 +159,7 @@ router.post('/my-Team-sales-points', async (req, res) => {
         console.error(err);
     }
 });
+
+
 
 module.exports = router;

@@ -8,7 +8,7 @@ const authGuard = require('../middleware/auth-middleware');
 
 const sequence = require('../middleware/CounterSequence')
 
-router.post('/approve-and-member',async(req,res)=>{
+router.post('/approve-and-member',authGuard,async(req,res)=>{
    try {
     let number =await sequence("empCode")
     const newEmployee = await Employee.create(req.body)
@@ -33,7 +33,7 @@ router.post('/approve-and-member',async(req,res)=>{
 
 
 
-router.post('/addOrder',async(req,res)=>{
+router.post('/addOrder',authGuard,async(req,res)=>{
     try{
     const newOrder = await Sales.create(req.body)
     .then(()=>{
@@ -48,7 +48,7 @@ catch(err){
 }
 })
 
-router.post('/get-order-by-date',async(req, res)=>{
+router.post('/get-order-by-date',authGuard,async(req, res)=>{
     try {
         const date = new Date(req.body.date)
         const empcode = req.body.empCode
@@ -84,7 +84,7 @@ router.post('/get-order-by-date',async(req, res)=>{
 })
 
 
-router.post('/get-my-sales-summary',async(req,res)=>{
+router.post('/get-my-sales-summary',authGuard,async(req,res)=>{
     try {
         const today = new Date();
         const nextDate = new Date()
@@ -109,7 +109,7 @@ router.post('/get-my-sales-summary',async(req,res)=>{
     }
 })
 
-router.get('/GetOrderByMonth',async(req, res)=>{
+router.get('/GetOrderByMonth',authGuard,async(req, res)=>{
     try {
         const sales = await Sales.find({orderDate:{ $gte:req.query.FromDate,$lte:req.query.ToDate}}).exec()
         res.json(sales);
@@ -119,13 +119,24 @@ router.get('/GetOrderByMonth',async(req, res)=>{
     
 })
 
-router.get('/get-my-direct-team',authGuard,async (req,res)=>{
+router.post('/get-my-direct-team',authGuard,async (req,res)=>{
     try{
-        const refferals = await Employee.find({referedBy:req.query.empCode},{"_id":0,"empCode":1,"personalInfo":{"name":1,"mobileNo":1},"address.current.postOffice":1,"points":1}).exec();
-        res.status(200).json({"status":true,"message":"success","content":refferals})
+        const refferals = await Employee.find({referedPersonEmpCode:req.body.empCode},{"_id":0,"empCode":1,"personalInfo":{"name":1,"mobileNo":1},"location":1,"Points":1,"TeamPoints":1}).exec();
+
+        const formattedResult = refferals.map(record => ({
+            empCode: record.empCode,
+            Name:record.personalInfo.name,
+            mobileNo:record.personalInfo.mobileNo,
+            Location:record.location,
+            Points:Number(record.Points),
+            TeamPoints: Number(record.TeamPoints),
+        }));
+
+        res.status(200).json({"status":true,"message":"success","content":formattedResult})
     }
     catch (error) {
         res.status(500).json({"status":false,"message":"Failed","content":null})
+        console.log(error)
     }
 })
 

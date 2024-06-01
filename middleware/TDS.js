@@ -2,7 +2,7 @@ const XLSX = require('xlsx');
 const Users = require('../Schema/TDS');
 
 const filePath = 'TDS.xlsx';
-const sheet = 'Sheet1';
+const sheet = 'Month';
 const requiredColumn = 'A';
 const maximumRowNumber = 1000000;
 
@@ -26,9 +26,16 @@ class Excel {
       }
 
       const rowIns = {
-        empCode: range[`A${row}`].w,
-        Month: range[`B${row}`] ? range[`B${row}`].w : '',
-        TdsAmount: range[`C${row}`] ? range[`C${row}`].w : '',
+        empCode: range[`B${row}`].w,
+        dateOfPayout: range[`C${row}`] ? range[`C${row}`].w : '',
+        monthlyCommissionPerPoints: range[`D${row}`] ? range[`D${row}`].w : '',
+        monthlyFixedCommission: range[`E${row}`] ? range[`E${row}`].w : '',
+        monthlySpecialCommissionPerPoints: range[`F${row}`] ? range[`F${row}`].w : '',
+        monthlySpecialCommission: range[`G${row}`] ? range[`G${row}`].w : '',
+        totalCommission: range[`H${row}`] ? range[`H${row}`].w : '',
+        tdsAmount: range[`I${row}`] ? range[`I${row}`].w : '',
+        netPayout: range[`J${row}`] ? range[`J${row}`].w : '',
+  
     };
 
       this.addUser(rowIns);
@@ -57,11 +64,18 @@ class Excel {
       },
     );
   }
+
   addUser(rowIns) {
         const userIns = new Users({
           empCode: rowIns.empCode,
-          Month : rowIns.Month,
-          TdsAmount: rowIns.TdsAmount,
+          dateOfPayout : rowIns.dateOfPayout,
+          monthlyCommissionPerPoints: rowIns.monthlyCommissionPerPoints,
+          monthlyFixedCommission: rowIns.monthlyFixedCommission,
+          monthlySpecialCommissionPerPoints: rowIns.monthlySpecialCommissionPerPoints,
+          monthlySpecialCommission: rowIns.monthlySpecialCommission,
+          totalCommission: rowIns.totalCommission,
+          tdsAmount: rowIns.tdsAmount,
+          netPayout: rowIns.netPayout,
 
         });
     userIns.save();
