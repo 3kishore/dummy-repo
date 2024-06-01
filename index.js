@@ -12,7 +12,7 @@ const employeeController = require('./controllers/Employee');
 const tdsController = require('./controllers/TDS');
 const viedoCoontroller = require('./controllers/Video');
 
-const allowedOrigins = ['https://pimaths-sales-monitoring-dashboard.vercel.app', 'http://localhost:4900'];
+const allowedOrigins = ['https://pimaths-sales-monitoring-dashboard.vercel.app', 'http://localhost:3000', 'http://localhost:4900'];
 
 // Configure CORS options
 const corsOptions = {
@@ -36,7 +36,7 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.send('products api running new deploy - 12');
+    res.send('products api running new deploy - 15');
 });
 
 app.get('/ping', (req, res) => {
