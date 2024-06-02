@@ -6,10 +6,14 @@ const router = express.Router();
 
 const authGuard = require('../middleware/auth-middleware');
 
-router.post('/upload-employee-payout',authGuard,async(req,res)=>{
+router.post('/upload-employee-payout',async(req,res)=>{
     try{
-        excel.importData();
-        res.status(200).json({"status":true,"message":"success","content":null})
+        excel.importData().then(()=>{
+            res.status(200).json({"status":true,"message":"success","content":null})
+        }).catch(err=>{
+            res.status(500).json({"status":false,"message":"Failed","content":err.message})
+        });;
+       
     }
     catch(err){
         res.status(500).json({"status":false,"message":"Failed","content":null})

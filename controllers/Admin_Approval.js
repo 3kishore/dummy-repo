@@ -45,11 +45,15 @@ router.get('/get-request-list',authGuard,async(req,res)=>{
     }
 })
 
-router.post('/upload-sales-data',authGuard,async(req,res)=>{
+router.post('/upload-sales-data',async(req,res)=>{
     try{
-        excel.importData();
+        excel.importData().then(()=>{
+            res.status(200).json({"status":true,"message":"success","content":null})
+        }).catch(err=>{
+            res.status(500).json({"status":false,"message":"Failed","content":err.message}) 
+        });
        // await referedPersonEmpCode()
-        res.status(200).json({"status":true,"message":"success","content":null})
+        
         
     }
     catch(err){
@@ -153,7 +157,7 @@ router.post('/my-Team-sales-points', async (req, res) => {
             }
         }
 
-        res.status(200).json({ "status": true, "message": "success", "content": formattedResult });
+        res.status(200).json({ "status": true, "message": "success", "content": null });
     } catch (err) {
         res.status(500).json({ "status": false, "message": "Failed", "content": null });
         console.error(err);

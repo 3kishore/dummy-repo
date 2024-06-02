@@ -14,7 +14,27 @@ router.post('/approve-and-member',authGuard,async(req,res)=>{
     const newEmployee = await Employee.create(req.body)
     let jobtitle = newEmployee.appliedFor
     const email = newEmployee.personalInfo.emailId
-    let empid =  jobtitle.toUpperCase().substring(0,3)+String(number).padStart(6,'0')
+    const department = {
+        directSalesTeam: 'direct-sales-team',
+        directPartnerSalesTeam: 'direct-partner-sales-team',
+        channelPartnerSalesTeam: 'channel-partner-sales-team'
+    }
+    let departmentPrefix = '';
+    if(newEmployee.department === department.directSalesTeam) {
+        departmentPrefix = 'TNDES';
+    } else if(newEmployee.department === department.directPartnerSalesTeam) {
+        departmentPrefix = 'TNDPS';
+    } else {
+        departmentPrefix = 'TNCPS';  
+    }
+    let jobPrefix = '';
+    let jobArray = [];
+    jobArray = jobtitle.split('-');
+    jobArray.forEach((obj) => {
+        jobPrefix += obj[0].toUpperCase();
+    })
+    // let empid =  jobtitle.toUpperCase().substring(0,3)+String(number).padStart(6,'0')
+    let empid = `${departmentPrefix}${jobPrefix}${number}`;
     newEmployee.password = newEmployee.personalInfo.name
     newEmployee.empCode = empid
     const savedEmployee = await newEmployee.save()
@@ -26,6 +46,7 @@ router.post('/approve-and-member',authGuard,async(req,res)=>{
    res.status(200).json({"status":true,"message":"success","content":null})
    } catch (error) {
     res.status(500).json({"status":false,"message":"Failed","content":null})
+   
    }
 
     

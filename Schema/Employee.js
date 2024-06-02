@@ -12,6 +12,7 @@ const Employee = new Schema({
   IsApproved: { type: Boolean, default: false },
   Points:{type:Number,default:0},
   TeamPoints:{type:Number,default:0},
+  department:{type:String},
   personalInfo: {
     type: new Schema({
       name: { type: String, required: true },

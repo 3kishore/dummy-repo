@@ -24,6 +24,7 @@ router.post('/authorize', async (req, res) => {
     const empCode = req.body.empCode
     const password = req.body.password
     let token=null;
+    let role;
 
     try {
         const user = await Users.findOne({ empCode:empCode }).exec();
@@ -40,12 +41,15 @@ router.post('/authorize', async (req, res) => {
         else if (user.password ===  password) {
         token = jwt.sign({ userId: user._id },jwtSecretKey , {
           expiresIn: '2h' // Token expiration time (e.g., 2 hour)
+          
       });
+      role = user.appliedFor
     }
         res.status(200).json({status:'True',message:'Success',content:{
             "name":name,
              "empCode":empCode,
-            "token":token
+            "token":token,
+            "jobTitle":role
         } });
     } catch (err) {
         res.status(500).json({"status":false,"message":"Failed","content":null})
