@@ -2,15 +2,15 @@ const XLSX = require('xlsx');
 const Users = require('../Schema/Orders');
 
 const filePath = 'Orders.xlsx';
-const sheet = 'Sheet1';
+const sheet = 'Orders';
 const requiredColumn = 'A';
 const maximumRowNumber = 1000000;
 
 class Excel {
-  async importData() {
+  async importData(path) {
     try{
       /* Promise all take array of independent commands */
-      await Promise.all([this.importUsers()]).then(() => {
+      await Promise.all([this.importUsers(path)]).then(() => {
         console.log('Uploaded finished!................... ^_^');
       });
     }
@@ -21,9 +21,9 @@ class Excel {
     
   }
 
-  async importUsers() {
+  async importUsers(path) {
     try {
-      const xlsx = XLSX.readFile(filePath);
+      const xlsx = XLSX.readFile(path);
       const range = xlsx.Sheets[sheet];
   
       console.log('Users data uploaded...');
@@ -68,14 +68,34 @@ class Excel {
     try {
       const result = await Users.find({"empCode": rowIns.empCode,"orderNo": rowIns.orderNo})
     console.log(result.length);
+    
     if (result.length == 0){
     const points = Number(rowIns.orderTotal/250)
     let orderDate = new Date(rowIns.orderDate)
+    console.log(orderDate.getMonth()+1)
+    console.log(orderDate.getFullYear())
 
+    const q1 = [4, 5, 6];
+    const q2 = [7, 8, 9];
+    const q3 = [10, 11, 12];
+    const q4 = [1, 2, 3];
+    let quarter = '';
+    if(q1.includes(orderDate.getMonth() + 1)) {
+      quarter = `q1-${orderDate.getFullYear()}-${orderDate.getFullYear()+1}`;
+    } else if(q2.includes(orderDate.getMonth() + 1)) {
+      quarter = `q2-${orderDate.getFullYear()}-${orderDate.getFullYear()+1}`;
+    } else if(q3.includes(orderDate.getMonth() + 1)) {
+      quarter = `q3-${orderDate.getFullYear()}-${orderDate.getFullYear()+1}`;
+    } else  {
+      quarter = `q4-${orderDate.getFullYear() - 1}-${orderDate.getFullYear()}`;
+    }
         const userIns = new Users({
           orderNo: rowIns.orderNo,
           orderStatus : rowIns.orderStatus,
           orderDate: orderDate.getTime(),
+          orderMonth: orderDate.getMonth()+1,
+          orderQuarter: quarter,
+          orderYear:orderDate.getFullYear(),
           firstName : rowIns.firstName, 
           lastName: rowIns.lastName,
           address: rowIns.address,

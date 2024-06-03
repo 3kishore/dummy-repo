@@ -6,16 +6,17 @@ const authGuard = require('../middleware/auth-middleware');
 const Employee = require('../Schema/Employee');
 const Orders = require('../Schema/Orders');
 
-router.post('/request-to-add-member',authGuard,async(req,res)=>{
+router.post('/request-to-add-member',async(req,res)=>{
     try{
         const new_approval = await admin_approval.create(req.body)
-        new_approval.IsApproved = false;
+        //new_approval.IsApproved = false;
         const saved_approval = await new_approval.save()
         res.status(200).json({"status":true,"message":"success","content":null})
 
     }
     catch(err){
         res.status(500).json({"status":false,"message":"Failed","content":null})
+        console.log(err)
     }
 })
 
@@ -35,9 +36,9 @@ router.post('/reject-member',authGuard,async(req,res)=>{
 
 )
 
-router.get('/get-request-list',authGuard,async(req,res)=>{
+router.get('/get-request-list',async(req,res)=>{
     try{
-        const requests = await admin_approval.find({IsApproved:false})
+        const requests = await admin_approval.find({})
         res.status(200).json({"status":true,"message":"success","content":requests})
     }
     catch(err){
@@ -47,12 +48,13 @@ router.get('/get-request-list',authGuard,async(req,res)=>{
 
 router.post('/upload-sales-data',async(req,res)=>{
     try{
-        excel.importData().then(()=>{
+        const filePath = req.body.filePath
+        excel.importData(filePath).then(()=>{
             res.status(200).json({"status":true,"message":"success","content":null})
         }).catch(err=>{
-            res.status(500).json({"status":false,"message":"Failed","content":err.message}) 
+            res.status(500).json({"status":false,"message":"Failed","content":err.message})
         });
-       // await referedPersonEmpCode()
+       // await referalId()
         
         
     }
@@ -103,7 +105,7 @@ router.post('/my-Team-sales-points', async (req, res) => {
             )
         );
         await Promise.all(updateEmployeePointsPromises);
-
+        console.log(formattedResult)
         // Step 3: Update team points for each employee based on referrals
         for (const record of formattedResult) {
             let emp = record.empCode;
@@ -114,7 +116,7 @@ router.post('/my-Team-sales-points', async (req, res) => {
                     {
                         $lookup: {
                             from: 'employees',
-                            localField: 'referedPersonEmpCode',
+                            localField: 'referalId',
                             foreignField: 'empCode',
                             as: 'referedPerson'
                         }
@@ -123,28 +125,30 @@ router.post('/my-Team-sales-points', async (req, res) => {
                     { $match: { empCode: emp } },
                     {
                         $project: {
-                            referedPersonEmpCode: 1
+                            referalId: 1
                         }
                     }
                 ]);
 
                 if (output.length === 0) break;
 
-                emp = output[0].referedPersonEmpCode;
+                emp = output[0].referalId;
 
                 if (!referEmpSet.has(emp)) {
                     referEmpSet.add(emp);
 
                     const teamPointsResults = await Employee.aggregate([
-                        { $match: { referedPersonEmpCode: emp } },
+                        { $match: { referalId: emp } },
                         {
                             $group: {
-                                _id: "$referedPersonEmpCode",
+                                _id: "$referalId",
                                 totalPoints: { $sum: "$Points" },
                                 totalTeamPoints: { $sum: "$TeamPoints" }
                             }
                         }
                     ]);
+
+                    console.log(teamPointsResults)
 
                     if (teamPointsResults.length > 0) {
                         const teamPointsData = teamPointsResults[0];

@@ -7,15 +7,15 @@ const requiredColumn = 'A';
 const maximumRowNumber = 1000000;
 
 class Excel {
-  async importData() {
+  async importData(path) {
     /* Promise all take array of independent commands */
-    await Promise.all([this.importUsers()]).then(() => {
+    await Promise.all([this.importUsers(path)]).then(() => {
       console.log('Uploaded finished!................... ^_^');
     });
   }
 
-  async importUsers() {
-    const xlsx = XLSX.readFile(filePath);
+  async importUsers(path) {
+    const xlsx = XLSX.readFile(path);
     const range = xlsx.Sheets[sheet];
 
     console.log('Users data uploaded...');

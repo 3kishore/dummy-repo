@@ -8,7 +8,8 @@ const authGuard = require('../middleware/auth-middleware');
 
 router.post('/upload-employee-payout',async(req,res)=>{
     try{
-        excel.importData().then(()=>{
+        const Path = req.body.filePath
+        await excel.importData(Path).then(()=>{
             res.status(200).json({"status":true,"message":"success","content":null})
         }).catch(err=>{
             res.status(500).json({"status":false,"message":"Failed","content":err.message})

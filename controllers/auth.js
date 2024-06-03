@@ -25,10 +25,11 @@ router.post('/authorize', async (req, res) => {
     const password = req.body.password
     let token=null;
     let role;
+    let region,state,area;
 
     try {
         const user = await Users.findOne({ empCode:empCode }).exec();
-        const name = user.personalInfo.name
+        const name = user.firstName
          
         let jwtSecretKey = process.env.JWT_SECRET_KEY;
         
@@ -43,16 +44,25 @@ router.post('/authorize', async (req, res) => {
           expiresIn: '2h' // Token expiration time (e.g., 2 hour)
           
       });
-      role = user.appliedFor
+      role = user.role
+      region = user.region
+      state = user.state
+      area = user.area
+
     }
         res.status(200).json({status:'True',message:'Success',content:{
             "name":name,
              "empCode":empCode,
             "token":token,
-            "jobTitle":role
+            "jobTitle":role,
+            "region":region,
+            "state":state,
+            "area":area
+
         } });
     } catch (err) {
         res.status(500).json({"status":false,"message":"Failed","content":null})
+        console.log(err.message)
     }
 });
 

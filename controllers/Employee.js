@@ -5,52 +5,127 @@ const Mail = require('../Email/Mail')
 const router = express.Router();
 const Admin = require('../Schema/Admin')
 const authGuard = require('../middleware/auth-middleware');
+const admin = require('../Schema/Admin')
 
 const sequence = require('../middleware/CounterSequence')
 
-router.post('/approve-and-member',authGuard,async(req,res)=>{
-   try {
-    let number =await sequence("empCode")
-    const newEmployee = await Employee.create(req.body)
-    let jobtitle = newEmployee.appliedFor
-    const email = newEmployee.personalInfo.emailId
-    const department = {
-        directSalesTeam: 'direct-sales-team',
-        directPartnerSalesTeam: 'direct-partner-sales-team',
-        channelPartnerSalesTeam: 'channel-partner-sales-team'
-    }
-    let departmentPrefix = '';
-    if(newEmployee.department === department.directSalesTeam) {
-        departmentPrefix = 'TNDES';
-    } else if(newEmployee.department === department.directPartnerSalesTeam) {
-        departmentPrefix = 'TNDPS';
-    } else {
-        departmentPrefix = 'TNCPS';  
-    }
-    let jobPrefix = '';
-    let jobArray = [];
-    jobArray = jobtitle.split('-');
-    jobArray.forEach((obj) => {
-        jobPrefix += obj[0].toUpperCase();
-    })
-    // let empid =  jobtitle.toUpperCase().substring(0,3)+String(number).padStart(6,'0')
-    let empid = `${departmentPrefix}${jobPrefix}${number}`;
-    newEmployee.password = newEmployee.personalInfo.name
-    newEmployee.empCode = empid
-    const savedEmployee = await newEmployee.save()
-    Mail(email,process.env.Subject,process.env.Body)
+router.post('/approve',async(req,res)=>{
+    try{
+        const id= req.body.id
+        const status = req.body.IsApproved
+        let results;
 
-    Approval(newEmployee.empCode)
-    
-   // Mail(req.body.personalInformation.emailId)
-   res.status(200).json({"status":true,"message":"success","content":null})
-   } catch (error) {
-    res.status(500).json({"status":false,"message":"Failed","content":null})
-   
-   }
+        const SelectAdmin = await admin.find({"_id":id},{"_id":0})
+        results = SelectAdmin
+        const newEmployee = await Employee.create(results)
+        console.log(newEmployee.firstName)
+       // newEmployee.save(newEmployee)
 
+    res.status(200).json({"status":true,"message":"success","content":SelectAdmin})
+    } catch (error) {
+     res.status(500).json({"status":false,"message":"Failed","content":error.message})
     
+    }
+
 })
+
+// router.post('/approve-and-member',async(req,res)=>{
+//    try {
+//     const id = req.body.id
+//     const status = req.body.isApproved
+//     if(status){
+//     let number =await sequence("empCode")
+//     const SelectAdmin = await admin.find({"_id":id})
+//     const newEmployee = await Employee.create(SelectAdmin)
+//     let jobtitle = newEmployee.role
+//     const email = newEmployee.emailId
+//     const department = {
+//         directSalesTeam: 'direct-sales-team',
+//         directPartnerSalesTeam: 'direct-partner-sales-team',
+//         channelPartnerSalesTeam: 'channel-partner-sales-team'
+//     }
+//     let departmentPrefix = '';
+//     if(newEmployee.department === department.directSalesTeam) {
+//         departmentPrefix = 'TNDE';
+//     } else if(newEmployee.department === department.directPartnerSalesTeam) {
+//         departmentPrefix = 'TNDP';
+//     } else {
+//         departmentPrefix = 'TNCP';  
+//     }
+//     let jobPrefix = '';
+//     let jobArray = [];
+//     jobArray = jobtitle.split('-');
+//     jobArray.forEach((obj) => {
+//         jobPrefix += (jobArray.length === 1) ? obj.substring(0, 2).toUpperCase() : obj[0].toUpperCase();
+//     })
+//     // let empid =  jobtitle.toUpperCase().substring(0,3)+String(number).padStart(6,'0')
+//     let empid = `${departmentPrefix}${jobPrefix}${String(number).padStart(4,'0')}`;
+//     newEmployee.password = newEmployee.firstName
+//     newEmployee.empCode = empid
+//     //newEmployee.save()
+//     // const savedEmployee = a
+//     // const savedEmployee = await newEmployee.save()
+//     Mail(email,process.env.Subject,process.env.Body)
+// }
+// else{
+//     const reject = await admin.deleteOne({_id:id})
+// }
+
+//     //Approval(newEmployee.empCode)
+    
+//    // Mail(req.body.personalInformation.emailId)
+//    res.status(200).json({"status":true,"message":"success","content":null})
+//    } catch (error) {
+//     res.status(500).json({"status":false,"message":"Failed","content":null})
+   
+//    }
+
+    
+// })
+
+router.post('/approve-and-member', async (req, res) => {
+    try {
+        const { id, isApproved: status } = req.body;
+
+        if (status) {
+            const number = await sequence("empCode");
+            const [selectedAdmin] = await admin.find({ "_id": id });
+
+            if (!selectedAdmin) {
+                return res.status(404).json({ status: false, message: "Admin not found", content: null });
+            }
+
+            const newEmployee = await Employee.create(selectedAdmin.toObject());
+            const { role: jobTitle, emailId: email, department: dept, firstName } = newEmployee;
+
+            const departmentPrefixes = {
+                'direct-sales-team': 'TNDE',
+                'direct-partner-sales-team': 'TNDP',
+                'channel-partner-sales-team': 'TNCP'
+            };
+
+            const departmentPrefix = departmentPrefixes[dept] || 'TNCP';
+
+            const jobPrefix = jobTitle.split('-')
+                .map(part => part.length === 1 ? part.toUpperCase() : part.substring(0, 2).toUpperCase())
+                .join('');
+
+            const empCode = `${departmentPrefix}${jobPrefix}${String(number).padStart(4, '0')}`;
+            newEmployee.password = firstName;
+            newEmployee.empCode = empCode;
+
+            await newEmployee.save();
+
+           Mail(email, process.env.Subject, process.env.Body);
+        } 
+            await admin.deleteOne({ "_id": id });
+            res.status(200).json({ status: true, message: "success", content: null });
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ status: false, message: "Failed", content: null });
+    }
+});
 
 
 
@@ -130,9 +205,10 @@ router.post('/get-my-sales-summary',authGuard,async(req,res)=>{
     }
 })
 
-router.get('/GetOrderByMonth',authGuard,async(req, res)=>{
+router.post('/GetOrderByMonth',authGuard,async(req, res)=>{
     try {
-        const sales = await Sales.find({orderDate:{ $gte:req.query.FromDate,$lte:req.query.ToDate}}).exec()
+        
+        const sales = await Sales.find().exec()
         res.json(sales);
     } catch (error) {
         res.status(500).json({message:"Order Not Added"+err})
