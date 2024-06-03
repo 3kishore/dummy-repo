@@ -7,27 +7,9 @@ const Admin = require('../Schema/Admin')
 const authGuard = require('../middleware/auth-middleware');
 const admin = require('../Schema/Admin')
 
-const sequence = require('../middleware/CounterSequence')
+const sequence = require('../middleware/CounterSequence');
+const Orders = require('../Schema/Orders');
 
-router.post('/approve',async(req,res)=>{
-    try{
-        const id= req.body.id
-        const status = req.body.IsApproved
-        let results;
-
-        const SelectAdmin = await admin.find({"_id":id},{"_id":0})
-        results = SelectAdmin
-        const newEmployee = await Employee.create(results)
-        console.log(newEmployee.firstName)
-       // newEmployee.save(newEmployee)
-
-    res.status(200).json({"status":true,"message":"success","content":SelectAdmin})
-    } catch (error) {
-     res.status(500).json({"status":false,"message":"Failed","content":error.message})
-    
-    }
-
-})
 
 // router.post('/approve-and-member',async(req,res)=>{
 //    try {
@@ -83,7 +65,7 @@ router.post('/approve',async(req,res)=>{
     
 // })
 
-router.post('/approve-and-member', async (req, res) => {
+router.post('/approve-and-member',authGuard, async (req, res) => {
     try {
         const { id, isApproved: status } = req.body;
 
@@ -205,6 +187,112 @@ router.post('/get-my-sales-summary',authGuard,async(req,res)=>{
     }
 })
 
+router.post('/get-my-monthly-sales-summary',authGuard,async(req,res)=>{
+    try{
+        const empcode = req.body.empCode      
+          const results = await Orders.aggregate([
+            {
+              $match: { empCode:empcode }, // Filter by empCode
+            },
+            {
+              $group: {
+                _id: { month: "$orderMonth", year: "$orderYear" }, // Group by month and year
+                totalOrders: { $sum: 1 },
+                totalOrderAmount: { $sum: { $toDouble: "$orderTotal" } },
+                totalDiscountAmount: { $sum: { $toDouble: "$discountAmount" } },
+                totalNetAmount: { $sum: { $toDouble: "$netAmount" } },
+                totalPoints: { $sum: "$points" } // Push all documents for the month
+              },
+            },
+          ]);
+          
+          const formattedResult = results.map(record=>({
+                orderMonth:record._id.month,
+                orderYear:record._id.year,
+                totalOrders:record.totalOrders,
+                totalOrderAmount:record.totalOrderAmount,
+                totalDiscountAmount:record.totalDiscountAmount,
+                totalNetAmount:record.totalNetAmount,
+          }));
+
+          console.log(formattedResult)
+
+        res.status(200).json({"status":true,"message":"success","content":formattedResult})
+    }
+    catch(err){
+        res.status(500).json({"status":true,"message":"success","content":null})
+        console.log(err)
+    }
+})
+
+router.post('/get-my-yearly-sales-summary',authGuard,async (req,res)=>{
+    try {
+        const empcode = req.body.empCode      
+          const results = await Orders.aggregate([
+            {
+              $match: { empCode:empcode }, // Filter by empCode
+            },
+            {
+              $group: {
+                _id: {  year: "$orderYear" }, // Group by month and year
+                totalOrders: { $sum: 1 },
+                totalOrderAmount: { $sum: { $toDouble: "$orderTotal" } },
+                totalDiscountAmount: { $sum: { $toDouble: "$discountAmount" } },
+                totalNetAmount: { $sum: { $toDouble: "$netAmount" } },
+                totalPoints: { $sum: "$points" } // Push all documents for the month
+              },
+            },
+          ]);
+
+          const formattedResult = results.map(record=>({
+            orderYear:record._id.year,
+            totalOrders:record.totalOrders,
+            totalOrderAmount:record.totalOrderAmount,
+            totalDiscountAmount:record.totalDiscountAmount,
+            totalNetAmount:record.totalNetAmount,
+      }));
+
+          res.status(200).json({"status":true,"message":"success","content":formattedResult})
+    } catch (error) {
+        res.status(500).json({"status":true,"message":"success","content":null})
+        console.log(err)
+    }
+})
+
+router.post('/get-my-quarterly-sales-summary',authGuard,async (req,res)=>{
+    try {
+        const empcode = req.body.empCode      
+          const results = await Orders.aggregate([
+            {
+              $match: { empCode:empcode }, // Filter by empCode
+            },
+            {
+              $group: {
+                _id: {  year: "$orderQuarter" }, // Group by month and year
+                totalOrders: { $sum: 1 },
+                totalOrderAmount: { $sum: { $toDouble: "$orderTotal" } },
+                totalDiscountAmount: { $sum: { $toDouble: "$discountAmount" } },
+                totalNetAmount: { $sum: { $toDouble: "$netAmount" } },
+                totalPoints: { $sum: "$points" } // Push all documents for the month
+              },
+            },
+          ]);
+
+          const formattedResult = results.map(record=>({
+            quarter:record._id.year,
+            totalOrders:record.totalOrders,
+            totalOrderAmount:record.totalOrderAmount,
+            totalDiscountAmount:record.totalDiscountAmount,
+            totalNetAmount:record.totalNetAmount,
+      }));
+
+          res.status(200).json({"status":true,"message":"success","content":formattedResult})
+    } catch (error) {
+        res.status(500).json({"status":true,"message":"success","content":null})
+        console.log(err)
+    }
+})
+
 router.post('/GetOrderByMonth',authGuard,async(req, res)=>{
     try {
         
@@ -218,13 +306,15 @@ router.post('/GetOrderByMonth',authGuard,async(req, res)=>{
 
 router.post('/get-my-direct-team',authGuard,async (req,res)=>{
     try{
-        const refferals = await Employee.find({referedPersonEmpCode:req.body.empCode},{"_id":0,"empCode":1,"personalInfo":{"name":1,"mobileNo":1},"location":1,"Points":1,"TeamPoints":1}).exec();
+        const refferals = await Employee.find({referalId:req.body.empCode},{"_id":0,"empCode":1,"firstName":1,"mobileNo":1,"area":1,"zone":1,"state":1,"Points":1,"TeamPoints":1}).exec();
 
         const formattedResult = refferals.map(record => ({
             empCode: record.empCode,
-            Name:record.personalInfo.name,
-            mobileNo:record.personalInfo.mobileNo,
-            Location:record.location,
+            Name:record.firstName,
+            mobileNo:record.mobileNo,
+            area:record.area,
+            zone:record.zone,
+            state:record.state,
             Points:Number(record.Points),
             TeamPoints: Number(record.TeamPoints),
         }));
