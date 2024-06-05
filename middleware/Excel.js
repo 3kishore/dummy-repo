@@ -67,13 +67,11 @@ class Excel {
 
     try {
       const result = await Users.find({"empCode": rowIns.empCode,"orderNo": rowIns.orderNo})
-    console.log(result.length);
     
     if (result.length == 0){
     const points = Number(rowIns.orderTotal/250)
     let orderDate = new Date(rowIns.orderDate)
-    console.log(orderDate.getMonth()+1)
-    console.log(orderDate.getFullYear())
+    
 
     const q1 = [4, 5, 6];
     const q2 = [7, 8, 9];

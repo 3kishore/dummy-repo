@@ -49,12 +49,14 @@ router.get('/get-request-list',async(req,res)=>{
 router.post('/upload-sales-data',async(req,res)=>{
     try{
         const filePath = req.body.filePath
-        excel.importData(filePath).then(()=>{
+        await excel.importData(filePath).then(()=>{
+            TeamPoints()
             res.status(200).json({"status":true,"message":"success","content":null})
         }).catch(err=>{
             res.status(500).json({"status":false,"message":"Failed","content":err.message})
         });
        // await referalId()
+     
         
         
     }
@@ -72,6 +74,99 @@ router.get('/get-admin-direct-employees',authGuard,async(req,res)=>{
         res.status(500).json({"status":false,"message":"Failed","content":null})
     }
 })
+
+
+const TeamPoints = async() => {
+    try {
+        // const date = new Date(req.body.date);
+        // const nextDate = new Date(date);
+        // nextDate.setDate(nextDate.getDate() + 1);
+
+        // Step 1: Aggregate orders to calculate total points for each employee
+        const aggregatedOrders = await Orders.aggregate([
+            {
+                $group: {
+                    _id: { empCode: "$empCode" },
+                    totalPoints: { $sum: "$points" }
+                }
+            }
+        ]);
+
+        // Format the result
+        const formattedResult = aggregatedOrders.map(record => ({
+            empCode: record._id.empCode,
+            MyPoints: Number(record.totalPoints),
+            TeamPoints: 0
+        }));
+
+        // Step 2: Update individual points for each employee
+        const updateEmployeePointsPromises = formattedResult.map(record => 
+            Employee.updateOne(
+                { empCode: record.empCode },
+                { $set: { Points: record.MyPoints } }
+            )
+        );
+        await Promise.all(updateEmployeePointsPromises);
+        //console.log(formattedResult)
+        // Step 3: Update team points for each employee based on referrals
+        for (const record of formattedResult) {
+            let emp = record.empCode;
+            const referEmpSet = new Set();
+
+            while (true) {
+                const output = await Employee.aggregate([
+                    {
+                        $lookup: {
+                            from: 'employees',
+                            localField: 'referalId',
+                            foreignField: 'empCode',
+                            as: 'referedPerson'
+                        }
+                    },
+                    { $unwind: '$referedPerson' },
+                    { $match: { empCode: emp } },
+                    {
+                        $project: {
+                            referalId: 1
+                        }
+                    }
+                ]);
+
+                if (output.length === 0) break;
+
+                emp = output[0].referalId;
+
+                if (!referEmpSet.has(emp)) {
+                    referEmpSet.add(emp);
+
+                    const teamPointsResults = await Employee.aggregate([
+                        { $match: { referalId: emp } },
+                        {
+                            $group: {
+                                _id: "$referalId",
+                                totalPoints: { $sum: "$Points" },
+                                totalTeamPoints: { $sum: "$TeamPoints" }
+                            }
+                        }
+                    ]);
+
+                    //console.log(teamPointsResults)
+
+                    if (teamPointsResults.length > 0) {
+                        const teamPointsData = teamPointsResults[0];
+                        await Employee.updateOne(
+                            { empCode: teamPointsData._id },
+                            { $set: { TeamPoints: teamPointsData.totalPoints + teamPointsData.totalTeamPoints } }
+                        );
+                    }
+                }
+            }
+        }
+
+    } catch (err) {
+        console.error(err);
+    }
+};
 
 
 router.post('/my-Team-sales-points', async (req, res) => {
