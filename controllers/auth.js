@@ -50,7 +50,7 @@ router.post('/authorize', async (req, res) => {
       area = user.area
 
     }
-        res.status(200).json({status:'True',message:'Success',content:{
+        res.status(200).json({status:true,message:'Success',content:{
             "name":name,
              "empCode":empCode,
             "token":token,

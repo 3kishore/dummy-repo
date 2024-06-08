@@ -6,7 +6,7 @@ const authGuard = require('../middleware/auth-middleware');
 const Employee = require('../Schema/Employee');
 const Orders = require('../Schema/Orders');
 
-router.post('/request-to-add-member',async(req,res)=>{
+router.post('/request-to-add-member',authGuard,async(req,res)=>{
     try{
         const new_approval = await admin_approval.create(req.body)
         //new_approval.IsApproved = false;
