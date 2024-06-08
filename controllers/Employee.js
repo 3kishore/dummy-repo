@@ -132,6 +132,8 @@ router.post('/get-order-by-date',authGuard,async(req, res)=>{
         const empcode = req.body.empCode
         const nextDate = new Date(date)
         nextDate.setDate(nextDate.getDate() + 1)
+       let points=0
+        
 
         
         const sales = await Sales.find({orderDate:{ $gte:date,$lte:nextDate},"empCode":empcode})
@@ -151,14 +153,134 @@ router.post('/get-order-by-date',authGuard,async(req, res)=>{
             }
         ]);
         
+        if(result.length > 0){
+            points =  Number(result[0].totalPoints)
+        }
         
-        let points =  Number(result[0].totalPoints)
 
         res.status(200).json({"status":true,"message":"success","content":{"Points":points,SoldTo:sales}})
     } catch (error) {
         res.status(500).json({"status":false,"message":"Failed","content":error.message})
     }
     
+})
+
+router.post('/get-order-by-month',authGuard,async(req,res)=>{
+    try {
+        const empCode = req.body.empCode
+        const month = req.body.month
+        const year = req.body.year
+        let points = 0
+
+        const sales =await Sales.find({"empCode":empCode,"orderMonth":month, "orderYear":year})
+
+        const results = await Orders.aggregate([
+            {
+              $match: { empCode:empCode,
+                        orderMonth:month,orderYear:year
+               }, // Filter by empCode
+            },
+            {
+              $group: {
+                _id: { month: "$orderMonth", year: "$orderYear" }, // Group by month and year
+                totalOrders: { $sum: 1 },
+                totalOrderAmount: { $sum: { $toDouble: "$orderTotal" } },
+                totalDiscountAmount: { $sum: { $toDouble: "$discountAmount" } },
+                totalNetAmount: { $sum: { $toDouble: "$netAmount" } },
+                totalPoints: { $sum: "$points" } // Push all documents for the month
+              },
+            },
+          ]);
+          if(results.length > 0){
+            points =  Number(results[0].totalPoints)
+          }
+
+        
+
+        res.status(200).json({"status":true,"message":"success","content":{"Points":points,SoldTo:sales}})
+        
+    } catch (error) {
+        res.status(500).json({"status":false,"message":"Failed","content":error.message})
+    }
+})
+
+router.post('/get-order-by-quarter',authGuard,async(req,res)=>{
+
+    const empCode = req.body.empCode
+        const quarter = req.body.quarter
+        const year = req.body.year
+        let points = 0
+        try{
+
+        const sales =await Sales.find({"empCode":empCode,"orderQuarter":quarter, "orderYear":year})
+
+        const results = await Orders.aggregate([
+            {
+              $match: { empCode:empCode,
+                orderQuarter:quarter,orderYear:year
+               }, // Filter by empCode
+            },
+            {
+              $group: {
+                _id: { year: "$orderQuarter"}, // Group by month and year
+                totalOrders: { $sum: 1 },
+                totalOrderAmount: { $sum: { $toDouble: "$orderTotal" } },
+                totalDiscountAmount: { $sum: { $toDouble: "$discountAmount" } },
+                totalNetAmount: { $sum: { $toDouble: "$netAmount" } },
+                totalPoints: { $sum: "$points" } // Push all documents for the month
+              },
+            },
+          ]);
+
+          if(results.length > 0 ){
+            points =  Number(results[0].totalPoints)
+          }
+        res.status(200).json({"status":true,"message":"success","content":{"Points":points,SoldTo:sales}})
+        
+    } catch (error) {
+        res.status(500).json({"status":false,"message":"Failed","content":error.message})
+        console.log(error)
+    }
+
+})
+
+router.post('/get-order-by-year',authGuard,async(req,res)=>{
+
+    const empCode = req.body.empCode
+        const year = req.body.year
+        let points = 0
+        try{
+
+        const sales =await Sales.find({"empCode":empCode,"orderYear":year})
+
+        const results = await Orders.aggregate([
+            {
+              $match: { empCode:empCode,
+                orderYear:year
+               }, // Filter by empCode
+            },
+            {
+              $group: {
+                _id: { year: "$orderYear"}, // Group by month and year
+                totalOrders: { $sum: 1 },
+                totalOrderAmount: { $sum: { $toDouble: "$orderTotal" } },
+                totalDiscountAmount: { $sum: { $toDouble: "$discountAmount" } },
+                totalNetAmount: { $sum: { $toDouble: "$netAmount" } },
+                totalPoints: { $sum: "$points" } // Push all documents for the month
+              },
+            },
+          ]);
+
+          if(results.length>0){
+            points =  Number(results[0].totalPoints)
+          }
+        res.status(200).json({"status":true,"message":"success","content":{"Points":points,SoldTo:sales}})
+        
+    } catch (error) {
+        res.status(500).json({"status":false,"message":"Failed","content":error.message})
+        console.log(error)
+    }
+
 })
 
 
