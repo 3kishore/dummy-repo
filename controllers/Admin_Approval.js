@@ -18,15 +18,6 @@ router.post('/request-to-add-member',authGuard,async(req,res)=>{
         const adminBody = `Dear SaleAdmin\n\nThe recruit request for role - ${new_approval.role} has been raised by ${new_approval.referedBy} - ${new_approval.referalId}\nPlease take a neccessary action(Approve/Reject)\n\nRegards,\nSalesAdmin`;
         const adminSubject = `Recurit Request`
         Mail(EmailDetails.FromAddress,adminSubject,adminBody)
-        const dept = new_approval.department[0].toUpperCase()+new_approval.department.slice(1)
-
-        // const employeeBody = `Dear ${new_approval.firstName},\n\nWe are pleased to inform you that your recruitment request has been successfully placed. Thank you for submitting your request. Here are the details of your submission:
-        // \nRequest Details:\n
-        // Role: ${new_approval.role}\n
-        // Department: ${new_approval.department}\n
-        // Requested By:${new_approval.referedBy}
-        // Our recruitment team will review the request and will be notified
-        // \n\nRegards,\nSalesTeam`;
         
         const employeeBody = `
         Dear ${new_approval.firstName},
