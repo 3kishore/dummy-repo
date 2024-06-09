@@ -65,7 +65,7 @@ const Orders = require('../Schema/Orders');
     
 // })
 
-router.post('/approve-and-member',authGuard, async (req, res) => {
+router.post('/approve-and-add-member',authGuard, async (req, res) => {
     try {
         const { id, isApproved: status } = req.body;
 
@@ -108,8 +108,6 @@ router.post('/approve-and-member',authGuard, async (req, res) => {
         res.status(500).json({ status: false, message: "Failed", content: null });
     }
 });
-
-
 
 router.post('/addOrder',authGuard,async(req,res)=>{
     try{
