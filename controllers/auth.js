@@ -58,7 +58,7 @@ router.post('/authorize', async (req, res) => {
             // "region":region,
             // "state":state,
             // "area":area,
-            ...user
+            ...user._doc
 
         } });
     } catch (err) {
