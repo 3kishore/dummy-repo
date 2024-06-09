@@ -93,7 +93,7 @@ router.post('/approve-and-add-member',authGuard, async (req, res) => {
                 .join('');
 
             const empCode = `${departmentPrefix}${jobPrefix}${String(number).padStart(4, '0')}`;
-            newEmployee.password = email;
+            newEmployee.password = empCode;
             newEmployee.empCode = empCode;
 
             await newEmployee.save();
