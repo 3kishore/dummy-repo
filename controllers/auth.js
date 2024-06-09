@@ -51,13 +51,14 @@ router.post('/authorize', async (req, res) => {
 
     }
         res.status(200).json({status:true,message:'Success',content:{
-            "name":name,
-             "empCode":empCode,
+            // "name":name,
+            //  "empCode":empCode,
             "token":token,
-            "jobTitle":role,
-            "region":region,
-            "state":state,
-            "area":area
+            // "role":role,
+            // "region":region,
+            // "state":state,
+            // "area":area,
+            ...user
 
         } });
     } catch (err) {
