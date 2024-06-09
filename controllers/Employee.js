@@ -430,13 +430,14 @@ router.post('/get-my-direct-team',authGuard,async (req,res)=>{
 
         const formattedResult = refferals.map(record => ({
             empCode: record.empCode,
-            Name:record.firstName,
+            name:record.firstName,
             mobileNo:record.mobileNo,
             area:record.area,
             zone:record.zone,
+            region: record.region,
             state:record.state,
-            Points:Number(record.Points),
-            TeamPoints: Number(record.TeamPoints),
+            points:Number(record.Points),
+            teamPoints: Number(record.TeamPoints),
         }));
 
         res.status(200).json({"status":true,"message":"success","content":formattedResult})
