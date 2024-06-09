@@ -4,9 +4,10 @@ const {Schema} = mongoose;
 
 const Employee = new Schema({
   referalId: { type: String, default: '' },
+  referedBy: { type: String, default: '' },
   empCode: { type: String, default:''},
   password:{ type: String, default:''},
-  state: { type: String, default: 'TN' },
+  state: { type: String, default: 'Tamil-Nadu' },
   emailId: { type: String, default: '' },
   firstName: { type: String, default: '' },
   lastName: { type: String, default: '' },
