@@ -70,7 +70,7 @@ router.post('/authorize', async (req, res) => {
 router.post('/forget-password',async(req,res)=>{
     const email = req.body.emailId
     try{
-        const user = await Users.findOne({'personalInfo.emailId':email}).exec()
+        const user = await Users.findOne({'emailId':email}).exec()
         if(!user){
             res.status(200).json({"status": false,"message":"User Not Found","content":null});
         }
@@ -88,7 +88,7 @@ router.post('/reset-password',async(req,res)=>{
     const email = req.body.emailId
     const password = req.body.password
     try{
-        const user = await Users.findOne({'personalInfo.emailId':email}).exec()
+        const user = await Users.findOne({'emailId':email}).exec()
         if(!user){
             res.status(200).json({"status":false,"message":"User Not Found","content":null});
         }

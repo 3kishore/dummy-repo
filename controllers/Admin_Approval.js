@@ -5,6 +5,8 @@ const excel = require('../middleware/Excel');
 const authGuard = require('../middleware/auth-middleware');
 const Employee = require('../Schema/Employee');
 const Orders = require('../Schema/Orders');
+const sequence = require('../middleware/CounterSequence');
+const Mail = require('../Email/Mail')
 
 router.post('/request-to-add-member',authGuard,async(req,res)=>{
     try{
@@ -17,6 +19,38 @@ router.post('/request-to-add-member',authGuard,async(req,res)=>{
     catch(err){
         res.status(500).json({"status":false,"message":"Failed","content":null})
         console.log(err)
+    }
+})
+
+router.post('/add-member-by-admin',async(req,res)=>{
+    try {
+        const number = await sequence("empCode");
+        const newEmployee = await Employee.create(req.body)
+        const { role: jobTitle, emailId: email, department: dept, firstName } = newEmployee;
+
+        const departmentPrefixes = {
+            'direct-sales-team': 'TNDE',
+            'direct-partner-sales-team': 'TNDP',
+            'channel-partner-sales-team': 'TNCP'
+        };
+
+        const departmentPrefix = departmentPrefixes[dept] || 'TNCP';
+
+        const jobPrefix = jobTitle.split('-')
+            .map(part => part.length === 1 ? part.toUpperCase() : part.substring(0, 2).toUpperCase())
+            .join('');
+
+        const empCode = `${departmentPrefix}${jobPrefix}${String(number).padStart(4, '0')}`;
+        newEmployee.password = email;
+        newEmployee.empCode = empCode;
+        const saved_employee = await newEmployee.save()
+        Mail(email, process.env.Subject, process.env.Body);
+        res.status(200).json({"status":true,"message":"success","content":null})
+        
+    } catch (error) {
+        res.status(500).json({"status":false,"message":"Failed","content":null})
+        console.log(error)
+        
     }
 })
 
