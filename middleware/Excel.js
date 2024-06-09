@@ -48,7 +48,7 @@ class Excel {
           discountAmount: range[`AJ${row}`] ? range[`AJ${row}`].w : '',
           netAmount: range[`AH${row}`] ? range[`AH${row}`].w : '',
           courseName: range[`AF${row}`] ? range[`AF${row}`].w : '',
-          empCode: range[`AL${row}`] ? range[`AL${row}`].w : '',
+          empCode: range[`AI${row}`] ? range[`AL${row}`].w : '',
       };
   
        await this.addUser(rowIns);

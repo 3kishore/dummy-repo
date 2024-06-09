@@ -9,6 +9,7 @@ const admin = require('../Schema/Admin')
 
 const sequence = require('../middleware/CounterSequence');
 const Orders = require('../Schema/Orders');
+const EmailDetails = require('../Email/EmailDetails')
 
 
 // router.post('/approve-and-member',async(req,res)=>{
@@ -66,12 +67,15 @@ const Orders = require('../Schema/Orders');
 // })
 
 router.post('/approve-and-add-member',authGuard, async (req, res) => {
+
     try {
+      
         const { id, isApproved: status } = req.body;
+        const [selectedAdmin] = await admin.find({ "_id": id });
 
         if (status) {
             const number = await sequence("empCode");
-            const [selectedAdmin] = await admin.find({ "_id": id });
+            
 
             if (!selectedAdmin) {
                 return res.status(404).json({ status: false, message: "Admin not found", content: null });
@@ -96,11 +100,39 @@ router.post('/approve-and-add-member',authGuard, async (req, res) => {
             newEmployee.password = empCode;
             newEmployee.empCode = empCode;
 
+            const body = `Dear ${newEmployee.firstName}\n\nWelcome to MathTutee! We are excited to have you join our team as a ${jobTitle}. Your skills and experience will be a valuable addition to our company\n\nPlease use below credentials to login\nEmpCode = ${empCode} \nPassword = ${empCode}\n\nIf you have any issues with login please contact your reporting manager or send your queries to below emailId ${EmailDetails.FromAddress} \n\nRegards,\nSalesAdmin`
+            const subject = "Onboarding is successfull"
+
             await newEmployee.save();
 
-           Mail(email, process.env.Subject, process.env.Body);
+           Mail(email, subject, body);
         } 
             await admin.deleteOne({ "_id": id });
+
+            if(status == false){
+            
+              const rejectionMessage = `
+              Dear ${selectedAdmin.firstName},
+
+              We regret to inform you that your recruitment request for the role of ${selectedAdmin.role} in the ${selectedAdmin.department} department has been rejected. 
+
+              After careful consideration, our recruitment team has determined that we are unable to proceed with this request at this time. 
+
+              Request Details:
+              Role: ${selectedAdmin.role}
+              Department: ${selectedAdmin.department}
+              Requested By: ${selectedAdmin.referedBy}
+
+              If you have any questions or need further clarification, please do not hesitate to reach out to us at ${EmailDetails.FromAddress}. We are here to assist you and discuss any concerns you may have.
+
+              Thank you for your understanding.
+
+              Best regards,
+              Sales Team
+`
+            const emailSubject = `Recruitment Request for ${selectedAdmin.role} - Rejection Notice`;
+            Mail(selectedAdmin.emailId, emailSubject, rejectionMessage);
+            }
             res.status(200).json({ status: true, message: "success", content: null });
         
     } catch (error) {

@@ -1,16 +1,17 @@
 const nodemailer = require('nodemailer')
+const EmailDetails = require('../Email/EmailDetails')
 require('dotenv').config()
 
 const Mail = async(ToMailAddress,mailsubject,mailtext)=>{
     const transporter = nodemailer.createTransport({
         service: process.env.Service,
         auth: {
-            user: process.env.SenderEmail,
-            pass: process.env.EmailPassword
+            user: EmailDetails.FromAddress,
+            pass: EmailDetails.EmailPassword
         }
     });
     var mailoptions = {
-        from:process.env.SenderEmail,
+        from:EmailDetails.FromAddress,
         to:ToMailAddress,
         subject:mailsubject,
         text:mailtext

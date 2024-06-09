@@ -7,13 +7,49 @@ const Employee = require('../Schema/Employee');
 const Orders = require('../Schema/Orders');
 const sequence = require('../middleware/CounterSequence');
 const Mail = require('../Email/Mail')
+const EmailDetails = require('../Email/EmailDetails')
+
 
 router.post('/request-to-add-member',authGuard,async(req,res)=>{
     try{
         const new_approval = await admin_approval.create(req.body)
         //new_approval.IsApproved = false;
         const saved_approval = await new_approval.save()
+        const adminBody = `Dear SaleAdmin\n\nThe recruit request for role - ${new_approval.role} has been raised by ${new_approval.referedBy} - ${new_approval.referalId}\nPlease take a neccessary action(Approve/Reject)\n\nRegards,\nSalesAdmin`;
+        const adminSubject = `Recurit Request`
+        Mail(EmailDetails.FromAddress,adminSubject,adminBody)
+        const dept = new_approval.department[0].toUpperCase()+new_approval.department.slice(1)
+
+        // const employeeBody = `Dear ${new_approval.firstName},\n\nWe are pleased to inform you that your recruitment request has been successfully placed. Thank you for submitting your request. Here are the details of your submission:
+        // \nRequest Details:\n
+        // Role: ${new_approval.role}\n
+        // Department: ${new_approval.department}\n
+        // Requested By:${new_approval.referedBy}
+        // Our recruitment team will review the request and will be notified
+        // \n\nRegards,\nSalesTeam`;
+        
+        const employeeBody = `
+        Dear ${new_approval.firstName},
+
+        We are pleased to inform you that your recruitment request has been successfully placed. Thank you for submitting your request. Here are the details of your submission:
+
+        Request Details:
+        Role: ${new_approval.role}
+        Department: ${new_approval.department}
+        Requested By: ${new_approval.referedBy}
+
+        Our recruitment team will review the request and you will be notified shortly.
+
+        Regards,
+        Sales Team
+        `;
+                    ;
+
+        const employeeSubject = `Recruitment Request Successfully Placed`
+        Mail(saved_approval.emailId,employeeSubject,employeeBody)
+
         res.status(200).json({"status":true,"message":"success","content":null})
+
 
     }
     catch(err){
@@ -41,10 +77,14 @@ router.post('/add-member-by-admin',async(req,res)=>{
             .join('');
 
         const empCode = `${departmentPrefix}${jobPrefix}${String(number).padStart(4, '0')}`;
-        newEmployee.password = empCode;
+        newEmployee.password = email;
         newEmployee.empCode = empCode;
         const saved_employee = await newEmployee.save()
-        Mail(email, process.env.Subject, process.env.Body);
+
+        const body = `Dear ${newEmployee.firstName}\n\nWelcome to MathTutee! We are excited to have you join our team as a ${jobTitle}. Your skills and experience will be a valuable addition to our company\n\nPlease use below credentials to login\nEmpCode = ${empCode} \nPassword = ${empCode}\n\nIf you have any issues with login please contact your reporting manager or send your queries to below emailId ${EmailDetails.FromAddress} \n\nRegards,\nSalesAdmin`
+        const subject = "Onboarding is successfull"
+
+        Mail(email, subject, body);
         res.status(200).json({"status":true,"message":"success","content":null})
         
     } catch (error) {
