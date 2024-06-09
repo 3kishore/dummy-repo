@@ -77,7 +77,7 @@ router.post('/add-member-by-admin',async(req,res)=>{
             .join('');
 
         const empCode = `${departmentPrefix}${jobPrefix}${String(number).padStart(4, '0')}`;
-        newEmployee.password = email;
+        newEmployee.password = empCode;
         newEmployee.empCode = empCode;
         const saved_employee = await newEmployee.save()
 
