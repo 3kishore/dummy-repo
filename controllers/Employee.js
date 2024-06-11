@@ -188,7 +188,7 @@ router.post('/get-order-by-date',authGuard,async(req, res)=>{
         }
         
 
-        res.status(200).json({"status":true,"message":"success","content":{"Points":points,SoldTo:sales}})
+        res.status(200).json({"status":true,"message":"success","content":{points:points, soldTo:sales}})
     } catch (error) {
         res.status(500).json({"status":false,"message":"Failed","content":error.message})
     }

@@ -5,6 +5,16 @@ const {Schema} = mongoose;
 const Employee = new Schema({
   referalId: { type: String, default: '' },
   referedBy: { type: String, default: '' },
+  seniorDetails: {
+    name:  {type: String, default:''},
+    empCode:  {type: String, default:''},
+    region: { type: String, default: '' },
+    department: { type: String, default: '' },
+    zone: { type: String, default: '' },
+    area: { type: String, default: '' },
+    emailId: { type: String, default: '' },
+    mobileNo: { type: String, default: '' },
+  },
   empCode: { type: String, default:''},
   password:{ type: String, default:''},
   state: { type: String, default: 'Tamil-Nadu' },
