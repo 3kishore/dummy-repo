@@ -13,7 +13,9 @@ const TDSSchema = new Schema({
   payrollType:String,
   payrollCompanyName:String,
   payrollCompanyEmployeeCode:String,
-  dateOfPayout: String,
+  month:String,
+  year:String,
+  quarter:String,
   points: Number,
   fixedCommissionPerPoint:Number,
   fixedCommission: Number,
@@ -21,7 +23,8 @@ const TDSSchema = new Schema({
   commission: Number,
   totalCommission: Number,
   tdsAmount: Number,
-  netPayout: Number
+  netPayout: Number,
+  report:String
 })
 
 module.exports = mongoose.model('TDS',TDSSchema);
