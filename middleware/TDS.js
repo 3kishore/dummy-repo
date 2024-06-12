@@ -9,7 +9,7 @@ class Excel {
   async importData(path) {
     const tasks = [
       this.importUsers(path, 'Month', this.parseMonthlyRow),
-      this.importUsers(path, 'Quarterly', this.parseQuarterlyRow),
+      this.importUsers(path, 'Quartely', this.parseQuarterlyRow),
       this.importUsers(path, 'Annual', this.parseAnnualRow)
     ];
 
@@ -45,15 +45,18 @@ class Excel {
       zone: range[`F${row}`] ? range[`F${row}`].w : '',
       region: range[`G${row}`] ? range[`G${row}`].w : '',
       area: range[`H${row}`] ? range[`H${row}`].w : '',
-      dateOfPayout:range[`I${row}`] ? range[`I${row}`].w : '',
-      Points: range[`J${row}`] ? range[`J${row}`].w : '',
-      monthlyFixedCommissionPerPoint: range[`K${row}`] ? range[`K${row}`].w : '',
-      monthlyFixedCommission: range[`L${row}`] ? range[`L${row}`].w : '',
-      monthlySpecialCommissionPerPoints: range[`M${row}`] ? range[`M${row}`].w : '',
-      monthlySpecialCommission: range[`N${row}`] ? range[`N${row}`].w : '',
-      totalCommission: range[`O${row}`] ? range[`O${row}`].w : '',
-      tdsAmount: range[`P${row}`] ? range[`P${row}`].w : '',
-      netPayout: range[`Q${row}`] ? range[`Q${row}`].w : '',
+      payrollType:range[`I${row}`] ? range[`I${row}`].w : '',
+      payrollCompanyName:range[`J${row}`] ? range[`J${row}`].w : '',
+      payrollCompanyEmployeeCode: range[`K${row}`] ? range[`K${row}`].w : '',
+      dateOfPayout:range[`L${row}`] ? range[`L${row}`].w : '',
+      Points: range[`M${row}`] ? range[`M${row}`].w : '',
+      monthlyFixedCommissionPerPoint: range[`N${row}`] ? range[`N${row}`].w : '',
+      monthlyFixedCommission: range[`O${row}`] ? range[`O${row}`].w : '',
+      monthlySpecialCommissionPerPoints: range[`P${row}`] ? range[`P${row}`].w : '',
+      monthlySpecialCommission: range[`Q${row}`] ? range[`Q${row}`].w : '',
+      totalCommission: range[`R${row}`] ? range[`R${row}`].w : '',
+      tdsAmount: range[`S${row}`] ? range[`S${row}`].w : '',
+      netPayout: range[`T${row}`] ? range[`T${row}`].w : '',
     };
   }
 
@@ -66,15 +69,18 @@ class Excel {
       zone: range[`F${row}`] ? range[`F${row}`].w : '',
       region: range[`G${row}`] ? range[`G${row}`].w : '',
       area: range[`H${row}`] ? range[`H${row}`].w : '',
-      dateOfPayout:range[`I${row}`] ? range[`I${row}`].w : '',
-      Points: range[`J${row}`] ? range[`J${row}`].w : '',
+      payrollType:range[`I${row}`] ? range[`I${row}`].w : '',
+      payrollCompanyName:range[`J${row}`] ? range[`J${row}`].w : '',
+      payrollCompanyEmployeeCode: range[`K${row}`] ? range[`K${row}`].w : '',
+      dateOfPayout:range[`L${row}`] ? range[`L${row}`].w : '',
+      Points: range[`M${row}`] ? range[`M${row}`].w : '',
       monthlyFixedCommissionPerPoint: '',
       monthlyFixedCommission:  '',
-      monthlySpecialCommissionPerPoints: range[`K${row}`] ? range[`K${row}`].w : '',
-      monthlySpecialCommission: range[`L${row}`] ? range[`L${row}`].w : '',
+      monthlySpecialCommissionPerPoints: range[`N${row}`] ? range[`N${row}`].w : '',
+      monthlySpecialCommission: range[`O${row}`] ? range[`O${row}`].w : '',
       totalCommission: '',
-      tdsAmount: range[`M${row}`] ? range[`M${row}`].w : '',
-      netPayout: range[`N${row}`] ? range[`N${row}`].w : '',
+      tdsAmount: range[`P${row}`] ? range[`P${row}`].w : '',
+      netPayout: range[`Q${row}`] ? range[`Q${row}`].w : '',
     };
   }
 
@@ -87,15 +93,18 @@ class Excel {
       zone: range[`F${row}`] ? range[`F${row}`].w : '',
       region: range[`G${row}`] ? range[`G${row}`].w : '',
       area: range[`H${row}`] ? range[`H${row}`].w : '',
-      dateOfPayout:range[`I${row}`] ? range[`I${row}`].w : '',
-      Points: range[`J${row}`] ? range[`J${row}`].w : '',
+      payrollType:range[`I${row}`] ? range[`I${row}`].w : '',
+      payrollCompanyName:range[`J${row}`] ? range[`J${row}`].w : '',
+      payrollCompanyEmployeeCode: range[`K${row}`] ? range[`K${row}`].w : '',
+      dateOfPayout:range[`L${row}`] ? range[`L${row}`].w : '',
+      Points: range[`M${row}`] ? range[`M${row}`].w : '',
       monthlyFixedCommissionPerPoint: '',
       monthlyFixedCommission:  '',
-      monthlySpecialCommissionPerPoints: range[`K${row}`] ? range[`K${row}`].w : '',
-      monthlySpecialCommission: range[`L${row}`] ? range[`L${row}`].w : '',
+      monthlySpecialCommissionPerPoints: range[`N${row}`] ? range[`N${row}`].w : '',
+      monthlySpecialCommission: range[`O${row}`] ? range[`O${row}`].w : '',
       totalCommission: '',
-      tdsAmount: range[`M${row}`] ? range[`M${row}`].w : '',
-      netPayout: range[`N${row}`] ? range[`N${row}`].w : '',
+      tdsAmount: range[`P${row}`] ? range[`P${row}`].w : '',
+      netPayout: range[`Q${row}`] ? range[`Q${row}`].w : '',
     };
   }
 
@@ -114,6 +123,9 @@ class Excel {
             region: row.region,
             area: row.area,
             points: row.Points,
+            payrollType:row.payrollType,
+            payrollCompanyName: row.payrollCompanyName,
+            payrollCompanyEmployeeCode: row.payrollCompanyEmployeeCode,
             fixedCommissionPerPoint: row.monthlyFixedCommissionPerPoint,
             fixedCommission: row.monthlyFixedCommission,
             commissionPerPoints:row.monthlySpecialCommissionPerPoints,
