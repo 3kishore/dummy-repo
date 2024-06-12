@@ -4,11 +4,18 @@ const {Schema} = mongoose;
 
 const TDSSchema = new Schema({
   empCode: String,
+  employeeName:String,
+  roleName:String,
+  department:String,
+  zone:String,
+  region:String,
+  area:String,
   dateOfPayout: String,
-  monthlyCommissionPerPoints: Number,
-  monthlyFixedCommission: Number,
-  monthlySpecialCommissionPerPoints: Number,
-  monthlySpecialCommission: Number,
+  points: Number,
+  fixedCommissionPerPoint:Number,
+  fixedCommission: Number,
+  commissionPerPoints: Number,
+  commission: Number,
   totalCommission: Number,
   tdsAmount: Number,
   netPayout: Number

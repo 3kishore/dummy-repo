@@ -159,6 +159,7 @@ catch(err){
 router.post('/get-order-by-date',authGuard,async(req, res)=>{
     try {
         const date = new Date(req.body.date)
+        date.setDate(date.getDate() + 1)
         const empcode = req.body.empCode
         const nextDate = new Date(date)
         nextDate.setDate(nextDate.getDate() + 1)

@@ -2,87 +2,133 @@ const XLSX = require('xlsx');
 const Users = require('../Schema/TDS');
 
 const filePath = 'TDS.xlsx';
-const sheet = 'Month';
 const requiredColumn = 'A';
 const maximumRowNumber = 1000000;
 
 class Excel {
   async importData(path) {
-    /* Promise all take array of independent commands */
-    await Promise.all([this.importUsers(path)]).then(() => {
-      console.log('Uploaded finished!................... ^_^');
+    const tasks = [
+      this.importUsers(path, 'Month', this.parseMonthlyRow),
+      this.importUsers(path, 'Quarterly', this.parseQuarterlyRow),
+      this.importUsers(path, 'Annual', this.parseAnnualRow)
+    ];
+
+    await Promise.all(tasks).then(() => {
+      console.log('All Records Uploaded finished!................... ^_^');
     });
   }
 
-  async importUsers(path) {
+  async importUsers(path, sheetName, parseRowFunction) {
     const xlsx = XLSX.readFile(path);
-    const range = xlsx.Sheets[sheet];
-
-    console.log('Users data uploaded...');
+    const range = xlsx.Sheets[sheetName];
+    const rows = [];
 
     for (let row = 2; row <= maximumRowNumber; ++row) {
       if (!range[`${requiredColumn}${row}`]) {
-        break; // stop if no another  data
+        break; // stop if no more data
       }
 
-      const rowIns = {
-        empCode: range[`B${row}`].w,
-        dateOfPayout: range[`C${row}`] ? range[`C${row}`].w : '',
-        monthlyCommissionPerPoints: range[`D${row}`] ? range[`D${row}`].w : '',
-        monthlyFixedCommission: range[`E${row}`] ? range[`E${row}`].w : '',
-        monthlySpecialCommissionPerPoints: range[`F${row}`] ? range[`F${row}`].w : '',
-        monthlySpecialCommission: range[`G${row}`] ? range[`G${row}`].w : '',
-        totalCommission: range[`H${row}`] ? range[`H${row}`].w : '',
-        tdsAmount: range[`I${row}`] ? range[`I${row}`].w : '',
-        netPayout: range[`J${row}`] ? range[`J${row}`].w : '',
-  
-    };
-
-     await this.addUser(rowIns);
-      // this.updateUser(rowIns);
+      const rowIns = parseRowFunction(range, row);
+      rows.push(rowIns);
     }
-    console.log('Users Done!');
+
+    await this.addUsers(rows);
+    console.log(`${sheetName} data uploaded...`);
   }
 
-  updateUser(rowIns) {
-    // update existed user
-    return Users.findOneAndUpdate(
-      {
-        empCode: rowIns.empCode,
-        month: rowIns.month // your condition
-      },
-      {
-        $set: {
-            TdsAmount: rowIns.TdsAmount,
-        }, // update values
-      },
-      {
-        new: true, // return new one
-      },
-      (error, result) => {
-        console.log([error, result]);
-      },
-    );
+  parseMonthlyRow(range, row) {
+    return {
+      empCode: range[`B${row}`].w,
+      employeeName: range[`C${row}`] ? range[`C${row}`].w : '',
+      roleName:range[`D${row}`] ? range[`D${row}`].w : '',
+      department:range[`E${row}`] ? range[`E${row}`].w : '',
+      zone: range[`F${row}`] ? range[`F${row}`].w : '',
+      region: range[`G${row}`] ? range[`G${row}`].w : '',
+      area: range[`H${row}`] ? range[`H${row}`].w : '',
+      dateOfPayout:range[`I${row}`] ? range[`I${row}`].w : '',
+      Points: range[`J${row}`] ? range[`J${row}`].w : '',
+      monthlyFixedCommissionPerPoint: range[`K${row}`] ? range[`K${row}`].w : '',
+      monthlyFixedCommission: range[`L${row}`] ? range[`L${row}`].w : '',
+      monthlySpecialCommissionPerPoints: range[`M${row}`] ? range[`M${row}`].w : '',
+      monthlySpecialCommission: range[`N${row}`] ? range[`N${row}`].w : '',
+      totalCommission: range[`O${row}`] ? range[`O${row}`].w : '',
+      tdsAmount: range[`P${row}`] ? range[`P${row}`].w : '',
+      netPayout: range[`Q${row}`] ? range[`Q${row}`].w : '',
+    };
   }
 
-  async addUser(rowIns) {
-        const result  = await Users.find({"empCode": rowIns.empCode,"dateOfPayout": rowIns.dateOfPayout})
-        console.log(result.length);
-        if(result.length == 0){
-        const userIns = new Users({
-          empCode: rowIns.empCode,
-          dateOfPayout : rowIns.dateOfPayout,
-          monthlyCommissionPerPoints: rowIns.monthlyCommissionPerPoints,
-          monthlyFixedCommission: rowIns.monthlyFixedCommission,
-          monthlySpecialCommissionPerPoints: rowIns.monthlySpecialCommissionPerPoints,
-          monthlySpecialCommission: rowIns.monthlySpecialCommission,
-          totalCommission: rowIns.totalCommission,
-          tdsAmount: rowIns.tdsAmount,
-          netPayout: rowIns.netPayout,
+  parseQuarterlyRow(range, row) {
+    return {
+     empCode: range[`B${row}`].w,
+      employeeName: range[`C${row}`] ? range[`C${row}`].w : '',
+      roleName:range[`D${row}`] ? range[`D${row}`].w : '',
+      department:range[`E${row}`] ? range[`E${row}`].w : '',
+      zone: range[`F${row}`] ? range[`F${row}`].w : '',
+      region: range[`G${row}`] ? range[`G${row}`].w : '',
+      area: range[`H${row}`] ? range[`H${row}`].w : '',
+      dateOfPayout:range[`I${row}`] ? range[`I${row}`].w : '',
+      Points: range[`J${row}`] ? range[`J${row}`].w : '',
+      monthlyFixedCommissionPerPoint: '',
+      monthlyFixedCommission:  '',
+      monthlySpecialCommissionPerPoints: range[`K${row}`] ? range[`K${row}`].w : '',
+      monthlySpecialCommission: range[`L${row}`] ? range[`L${row}`].w : '',
+      totalCommission: '',
+      tdsAmount: range[`M${row}`] ? range[`M${row}`].w : '',
+      netPayout: range[`N${row}`] ? range[`N${row}`].w : '',
+    };
+  }
 
-        });
-    userIns.save();
+  parseAnnualRow(range, row) {
+    return {
+      empCode: range[`B${row}`].w,
+      employeeName: range[`C${row}`] ? range[`C${row}`].w : '',
+      roleName:range[`D${row}`] ? range[`D${row}`].w : '',
+      department:range[`E${row}`] ? range[`E${row}`].w : '',
+      zone: range[`F${row}`] ? range[`F${row}`].w : '',
+      region: range[`G${row}`] ? range[`G${row}`].w : '',
+      area: range[`H${row}`] ? range[`H${row}`].w : '',
+      dateOfPayout:range[`I${row}`] ? range[`I${row}`].w : '',
+      Points: range[`J${row}`] ? range[`J${row}`].w : '',
+      monthlyFixedCommissionPerPoint: '',
+      monthlyFixedCommission:  '',
+      monthlySpecialCommissionPerPoints: range[`K${row}`] ? range[`K${row}`].w : '',
+      monthlySpecialCommission: range[`L${row}`] ? range[`L${row}`].w : '',
+      totalCommission: '',
+      tdsAmount: range[`M${row}`] ? range[`M${row}`].w : '',
+      netPayout: range[`N${row}`] ? range[`N${row}`].w : '',
+    };
+  }
+
+  async addUsers(rows) {
+    const bulkOps = rows.map(row => ({
+      updateOne: {
+        filter: { empCode: row.empCode, dateOfPayout: row.dateOfPayout },
+        update: {
+          $setOnInsert: {
+            empCode: row.empCode,
+            dateOfPayout: row.dateOfPayout,
+            employeeName: row.employeeName,
+            roleName: row.roleName,
+            department: row.department,
+            zone: row.zone,
+            region: row.region,
+            area: row.area,
+            points: row.Points,
+            fixedCommissionPerPoint: row.monthlyFixedCommissionPerPoint,
+            fixedCommission: row.monthlyFixedCommission,
+            commissionPerPoints:row.monthlySpecialCommissionPerPoints,
+            commission:row.monthlySpecialCommission,
+            totalCommission: row.totalCommission,
+            tdsAmount: row.tdsAmount,
+            netPayout: row.netPayout,
+          }
+        },
+        upsert: true
       }
+    }));
+
+    await Users.bulkWrite(bulkOps);
+    console.log('Bulk write completed.');
   }
 }
 
