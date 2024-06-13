@@ -65,10 +65,6 @@ class Excel {
       payrollType: range[`I${row}`]?.w || '',
       payrollCompanyName: range[`J${row}`]?.w || '',
       payrollCompanyEmployeeCode: range[`K${row}`]?.w || '',
-      year: range[`M${row}`]?.w || '',
-      Points: range[`N${row}`]?.w || '',
-      tdsAmount: range[`T${row}`]?.w || '',
-      netPayout: range[`U${row}`]?.w || '',
       report: reportType
     };
 
@@ -80,21 +76,33 @@ class Excel {
         monthlyFixedCommission: range[`P${row}`]?.w || '',
         monthlySpecialCommissionPerPoints: range[`Q${row}`]?.w || '',
         monthlySpecialCommission: range[`R${row}`]?.w || '',
-        totalCommission: range[`S${row}`]?.w || ''
+        totalCommission: range[`S${row}`]?.w || '',
+        year: range[`M${row}`]?.w || '',
+        Points: range[`N${row}`]?.w || '',
+        tdsAmount: range[`T${row}`]?.w || '',
+        netPayout: range[`U${row}`]?.w || '',
       };
     } else if (reportType === 'Quarter') {
       return {
         ...baseData,
         quarter: range[`L${row}`]?.w || '',
         quarterlyCommissionPerPoints: range[`O${row}`]?.w || '',
-        quarterlyCommission: range[`P${row}`]?.w || ''
+        quarterlyCommission: range[`P${row}`]?.w || '',
+        year: range[`M${row}`]?.w || '',
+        Points: range[`N${row}`]?.w || '',
+        tdsAmount: range[`Q${row}`]?.w || '',
+        netPayout: range[`R${row}`]?.w || '',
       };
     } else if (reportType === 'Annual') {
       return {
         ...baseData,
         annualCommissionPerPoints: range[`N${row}`]?.w || '',
-        annualSpecialCommission: range[`O${row}`]?.w || ''
-      };
+        annualSpecialCommission: range[`O${row}`]?.w || '',
+        year: range[`L${row}`]?.w || '',
+        Points: range[`M${row}`]?.w || '',
+        tdsAmount: range[`P${row}`]?.w || '',
+        netPayout: range[`Q${row}`]?.w || '',
+        };
     }
   }
 
