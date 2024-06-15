@@ -17,6 +17,33 @@ router.post('/request-to-add-member',authGuard,async(req,res)=>{
         const saved_approval = await new_approval.save()
         const adminBody = `Dear SaleAdmin\n\nThe recruit request for role - ${new_approval.role} has been raised by ${new_approval.referedBy} - ${new_approval.referalId}\nPlease take a neccessary action(Approve/Reject)\n\nRegards,\nSalesAdmin`;
         const adminSubject = `Recurit Request`
+
+        const referalId = new_approval.referalId
+
+        const referemp = await Employee.find({"empCode":referalId})
+
+        const referEmail = referemp[0].emailId
+        const firstName = referemp[0].firstName
+        const lastName = referemp[0].lastName
+
+        const referalbody = `Dear ${firstName} ${lastName},
+
+    Thank you for submitting your referral request!
+
+    We have successfully received your referral request and our team will review it shortly.
+    
+    If you have any questions or need further assistance, please do not hesitate to contact us.
+
+    Best regards,
+    SaleAdmin`
+
+        const referalSubject = `Referral Request Submission Confirmation`
+
+        console.log(new_approval.referalId)
+        Mail(referEmail,referalSubject,referalbody)
+
+
+
         Mail(EmailDetails.FromAddress,adminSubject,adminBody)
         
         const employeeBody = `
@@ -48,7 +75,6 @@ router.post('/request-to-add-member',authGuard,async(req,res)=>{
         console.log(err)
     }
 })
-
 router.post('/add-member-by-admin',async(req,res)=>{
     try {
         const number = await sequence("empCode");
