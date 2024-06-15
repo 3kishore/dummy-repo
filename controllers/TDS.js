@@ -3,7 +3,6 @@ const tds = require('../Schema/TDS')
 const quarterly = require('../Schema/QuarterlyPayout')
 const annual=require('../Schema/AnnualPayout')
 const excel = require('../middleware/TDS')
-const excel = require('../middleware/TDS')
 
 const router = express.Router();
 
