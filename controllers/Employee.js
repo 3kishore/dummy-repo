@@ -98,7 +98,7 @@ router.post('/approve-and-add-member',authGuard, async (req, res) => {
 
           // const empCode = `${departmentPrefix}${jobPrefix}${String(number).padStart(4, '0')}`;
           const empCode = `SEC${String(number).padStart(7,'0')}`
-          newEmployee.password = email;
+          newEmployee.password = empCode;
           newEmployee.empCode = empCode;
 
           const body = `Dear ${newEmployee.firstName}\n\nWelcome to MathTutee! We are excited to have you join our team as a ${jobTitle}. Your skills and experience will be a valuable addition to our company\n\nPlease use below credentials to login\nEmpCode = ${empCode} \nPassword = ${empCode}\n\nIf you have any issues with login please contact your reporting manager or send your queries to below emailId ${EmailDetails.FromAddress} \n\nRegards,\nSalesAdmin`
