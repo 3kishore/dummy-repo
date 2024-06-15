@@ -316,28 +316,37 @@ router.post('/get-order-by-year',authGuard,async(req,res)=>{
 
 
 router.post('/get-my-sales-summary',authGuard,async(req,res)=>{
-    try {
-        const today = new Date();
-        const nextDate = new Date()
-        const empcode = req.body.empCode
-        
-        nextDate.setDate(nextDate.getDate() - 7)
+  try {
+      const today = new Date();
+      const nextDate = new Date()
+      const empcode = req.body.empCode
+      
+      nextDate.setDate(nextDate.getDate() - 7)
 
-        const result = await Sales.aggregate([
-            {$match: {
-                "empCode": empcode,
-                orderDate: { $gte: nextDate, $lt: today}
-            }},
-            {$group: {
+      const result = await Sales.aggregate([
+        {
+            $match: {
+                "empCode":empcode,
+                orderDate: { $gte: nextDate, $lt: today }
+            }
+        },
+        {
+            $group: {
                 _id: { $dateToString: { format: "%Y-%m-%d", date: "$orderDate" } },
                 totalPoints: { $sum: "$points" }
-            }}
-        ]);
-        
-        res.status(200).json({"status":true,"message":"success","content":result})
-    } catch (error) {
-        res.status(500).json({"status":false,"message":"Failed","content":null})
-    }
+            }
+        },
+        {
+            $sort: { "_id": 1 }
+        }
+    ]);
+      
+      res.status(200).json({"status":true,"message":"success","content":result})
+  } catch (error) {
+      res.status(500).json({"status":false,"message":"Failed","content":null})
+      console.log(error)
+
+  }
 })
 
 router.post('/get-my-monthly-sales-summary',authGuard,async(req,res)=>{
