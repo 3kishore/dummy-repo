@@ -11,6 +11,7 @@ const authorize = require('./controllers/auth');
 const employeeController = require('./controllers/Employee');
 const tdsController = require('./controllers/TDS');
 const viedoCoontroller = require('./controllers/Video');
+const helpAndSupport = require('./controllers/HelpAndSupport')
 
 const allowedOrigins = ['https://pimaths-sales-monitoring-dashboard.vercel.app', 'http://localhost:3000', 'http://localhost:4900'];
 
@@ -52,6 +53,8 @@ app.use('/video', viedoCoontroller);
 app.use('/employee', employeeController);
 
 app.use('/tds', tdsController);
+
+app.use('/help-and-support',helpAndSupport)
 
 app.listen(8080, () => {
     console.log('Server is listenin on PORT :' + PORT);

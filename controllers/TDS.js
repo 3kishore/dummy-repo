@@ -1,5 +1,8 @@
 const express = require('express');
 const tds = require('../Schema/TDS')
+const quarterly = require('../Schema/QuarterlyPayout')
+const annual=require('../Schema/AnnualPayout')
+const excel = require('../middleware/TDS')
 const excel = require('../middleware/TDS')
 
 const router = express.Router();
@@ -41,9 +44,10 @@ router.post('/get-my-monthly-payout-report',authGuard,async(req,res)=>{
 router.post('/get-my-quarterly-payout-report',authGuard,async(req,res)=>{
     try{
         const empCode = req.body.empCode
-        const quarter = req.body.quarter
-        const year = req.body.year
-        const myPayOut = await tds.find({"empCode": empCode, "quarter": quarter, "year": year,"report":"Quarter"})
+        // const quarter = req.body.quarter
+        // const year = req.body.year
+        //const myPayOut = await quarterly.find({"empCode": empCode, "quarter": quarter, "year": year,"report":"Quarter"})
+        const myPayOut = await quarterly.find({"empCode": empCode})
         res.status(200).json({"status":true,"message":"success","content":myPayOut})
 
 
@@ -58,8 +62,9 @@ router.post('/get-my-annual-payout-report',authGuard,async(req,res)=>{
     try{
         const empCode = req.body.empCode
         
-        const year = req.body.year
-        const myPayOut = await tds.find({"empCode": empCode, "year": year,"report":"Annual"})
+        //const year = req.body.year
+        //const myPayOut = await annual.find({"empCode": empCode, "year": year,"report":"Annual"})
+        const myPayOut = await annual.find({"empCode": empCode})
         res.status(200).json({"status":true,"message":"success","content":myPayOut})
 
 

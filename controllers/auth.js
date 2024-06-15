@@ -75,7 +75,10 @@ router.post('/forget-password',async(req,res)=>{
             res.status(200).json({"status": false,"message":"User Not Found","content":null});
         }
         else{
-            Mail(email,process.env.PasswordSubject,process.env.PasswordReset)
+           const PasswordReset = "You have requested a password reset for your account. Please click the following link to reset your password: https://pimaths-sales-monitoring-dashboard.vercel.app/login?reset-password"
+           const PasswordSubject = "Password Reset"
+
+            Mail(email,PasswordSubject,PasswordReset)
             res.status(200).json({"status":true,"message":"success","content":null})
         }
     }
