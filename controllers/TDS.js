@@ -76,12 +76,22 @@ router.post('/get-my-annual-payout-report',authGuard,async(req,res)=>{
 
 router.post('/get-my-payout-report',authGuard,async(req,res)=>{
     try{
-        const myTDS = await tds.find({empCode:req.body.empCode}).exec()
-        res.status(200).json({"status":true,"message":"success","content":myTDS})
+        const empCode = req.body.empCode
+        
+        //const year = req.body.year
+        //const myPayOut = await annual.find({"empCode": empCode, "year": year,"report":"Annual"})
+        const myPayOut = await annual.find({"empCode": empCode})
+        const quarter = await quarterly.find({"empCode": empCode})
+        const annualpayout = await annual.find({"empCode": empCode})
+        const content = [...myPayOut,...quarter,...annualpayout]
+        res.status(200).json({"status":true,"message":"success","content":content})
+
+
+    }catch(err){
+        res.status(500).json({"status":false,"message":"Failed","content":err.message})
+        console.log(err)
     }
-    catch(err){
-        res.status(500).json({"status":false,"message":"Failed","content":null})
-    }
+   
 })
 
 module.exports = router
