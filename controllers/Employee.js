@@ -68,79 +68,79 @@ const EmailDetails = require('../Email/EmailDetails')
 
 router.post('/approve-and-add-member',authGuard, async (req, res) => {
 
-    try {
-      
-        const { id, isApproved: status } = req.body;
-        const [selectedAdmin] = await admin.find({ "_id": id });
+  try {
+    
+      const { id, isApproved: status } = req.body;
+      const [selectedAdmin] = await admin.find({ "_id": id });
 
-        if (status) {
-            const number = await sequence("empCode");
-            
+      if (status) {
+          const number = await sequence("empCode");
+          
 
-            if (!selectedAdmin) {
-                return res.status(404).json({ status: false, message: "Admin not found", content: null });
-            }
+          if (!selectedAdmin) {
+              return res.status(404).json({ status: false, message: "Admin not found", content: null });
+          }
 
-            const newEmployee = await Employee.create(selectedAdmin.toObject());
-            const { role: jobTitle, emailId: email, department: dept, firstName } = newEmployee;
+          const newEmployee = await Employee.create(selectedAdmin.toObject());
+          const { role: jobTitle, emailId: email, department: dept, firstName } = newEmployee;
 
-            const departmentPrefixes = {
-                'direct-sales-team': 'TNDE',
-                'direct-partner-sales-team': 'TNDP',
-                'channel-partner-sales-team': 'TNCP'
-            };
+          // const departmentPrefixes = {
+          //     'direct-sales-team': 'TNDE',
+          //     'direct-partner-sales-team': 'TNDP',
+          //     'channel-partner-sales-team': 'TNCP'
+          // };
 
-            const departmentPrefix = departmentPrefixes[dept] || 'TNCP';
+          // const departmentPrefix = departmentPrefixes[dept] || 'TNCP';
 
-            const jobPrefix = jobTitle.split('-')
-                .map(part => part.length === 1 ? part.toUpperCase() : part.substring(0, 2).toUpperCase())
-                .join('');
+          // const jobPrefix = jobTitle.split('-')
+          //     .map(part => part.length === 1 ? part.toUpperCase() : part.substring(0, 2).toUpperCase())
+          //     .join('');
 
-            const empCode = `${departmentPrefix}${jobPrefix}${String(number).padStart(4, '0')}`;
-            newEmployee.password = empCode;
-            newEmployee.empCode = empCode;
+          // const empCode = `${departmentPrefix}${jobPrefix}${String(number).padStart(4, '0')}`;
+          const empCode = `SEC${String(number).padStart(7,'0')}`
+          newEmployee.password = email;
+          newEmployee.empCode = empCode;
 
-            const body = `Dear ${newEmployee.firstName}\n\nWelcome to MathTutee! We are excited to have you join our team as a ${jobTitle}. Your skills and experience will be a valuable addition to our company\n\nPlease use below credentials to login\nEmpCode = ${empCode} \nPassword = ${empCode}\n\nIf you have any issues with login please contact your reporting manager or send your queries to below emailId ${EmailDetails.FromAddress} \n\nRegards,\nSalesAdmin`
-            const subject = "Onboarding is successfull"
+          const body = `Dear ${newEmployee.firstName}\n\nWelcome to MathTutee! We are excited to have you join our team as a ${jobTitle}. Your skills and experience will be a valuable addition to our company\n\nPlease use below credentials to login\nEmpCode = ${empCode} \nPassword = ${empCode}\n\nIf you have any issues with login please contact your reporting manager or send your queries to below emailId ${EmailDetails.FromAddress} \n\nRegards,\nSalesAdmin`
+          const subject = "Onboarding is successfull"
 
-            await newEmployee.save();
+          await newEmployee.save();
 
-           Mail(email, subject, body);
-        } 
-            await admin.deleteOne({ "_id": id });
+         Mail(email, subject, body);
+      } 
+          await admin.deleteOne({ "_id": id });
 
-            if(status == false){
-            
-              const rejectionMessage = `
-              Dear ${selectedAdmin.firstName},
+          if(status == false){
+          
+            const rejectionMessage = `
+            Dear ${selectedAdmin.firstName},
 
-              We regret to inform you that your recruitment request for the role of ${selectedAdmin.role} in the ${selectedAdmin.department} department has been rejected. 
+            We regret to inform you that your recruitment request for the role of ${selectedAdmin.role} in the ${selectedAdmin.department} department has been rejected. 
 
-              After careful consideration, our recruitment team has determined that we are unable to proceed with this request at this time. 
+            After careful consideration, our recruitment team has determined that we are unable to proceed with this request at this time. 
 
-              Request Details:
-              Role: ${selectedAdmin.role}
-              Department: ${selectedAdmin.department}
-              Requested By: ${selectedAdmin.referedBy}
+            Request Details:
+            Role: ${selectedAdmin.role}
+            Department: ${selectedAdmin.department}
+            Requested By: ${selectedAdmin.referedBy}
 
-              If you have any questions or need further clarification, please do not hesitate to reach out to us at ${EmailDetails.FromAddress}. We are here to assist you and discuss any concerns you may have.
+            If you have any questions or need further clarification, please do not hesitate to reach out to us at ${EmailDetails.FromAddress}. We are here to assist you and discuss any concerns you may have.
 
-              Thank you for your understanding.
+            Thank you for your understanding.
 
-              Best regards,
-              Sales Team
+            Best regards,
+            Sales Team
 `
-            const emailSubject = `Recruitment Request for ${selectedAdmin.role} - Rejection Notice`;
-            Mail(selectedAdmin.emailId, emailSubject, rejectionMessage);
-            }
-            res.status(200).json({ status: true, message: "success", content: null });
-        
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ status: false, message: "Failed", content: null });
-    }
+          const emailSubject = `Recruitment Request for ${selectedAdmin.role} - Rejection Notice`;
+          Mail(selectedAdmin.emailId, emailSubject, rejectionMessage);
+          }
+          res.status(200).json({ status: true, message: "success", content: null });
+      
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ status: false, message: "Failed", content: null });
+  }
 });
-
 router.post('/addOrder',authGuard,async(req,res)=>{
     try{
     const newOrder = await Sales.create(req.body)
