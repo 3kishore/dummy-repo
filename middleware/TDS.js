@@ -81,8 +81,8 @@ class Excel {
         Points: range[`N${row}`]?.w || '',
         tdsAmount: range[`T${row}`]?.w || '',
         netPayout: range[`U${row}`]?.w || '',
-        transactionId: range[`v${row}`]?.w || '',
-        transactionDate: range[`w${row}`]?.w || '',
+        transactionId: range[`V${row}`]?.w || '',
+        transactionDate: range[`W${row}`]?.w || '',
         transactionStatus: range[`X${row}`]?.w || '',
       };
     } else if (reportType === 'Quarter') {
