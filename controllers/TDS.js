@@ -80,7 +80,7 @@ router.post('/get-my-payout-report',authGuard,async(req,res)=>{
         
         //const year = req.body.year
         //const myPayOut = await annual.find({"empCode": empCode, "year": year,"report":"Annual"})
-        const myPayOut = await annual.find({"empCode": empCode})
+        const myPayOut = await tds.find({"empCode": empCode})
         const quarter = await quarterly.find({"empCode": empCode})
         const annualpayout = await annual.find({"empCode": empCode})
         const content = [...myPayOut,...quarter,...annualpayout]
