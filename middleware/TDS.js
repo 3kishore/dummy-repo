@@ -82,8 +82,9 @@ class Excel {
         tdsAmount: range[`T${row}`]?.w || '',
         netPayout: range[`U${row}`]?.w || '',
         transactionId: range[`V${row}`]?.w || '',
-        transactionDate: range[`W${row}`]?.w || '',
+        transactionDate: new Date( range[`W${row}`]?.w || ''),
         transactionStatus: range[`X${row}`]?.w || '',
+        financialYear: range[`Y${row}`]?.w || ''
       };
     } else if (reportType === 'Quarter') {
       return {
@@ -96,8 +97,9 @@ class Excel {
         tdsAmount: range[`Q${row}`]?.w || '',
         netPayout: range[`R${row}`]?.w || '',
         transactionId: range[`S${row}`]?.w || '',
-        transactionDate: range[`T${row}`]?.w || '',
+        transactionDate: new Date(range[`T${row}`]?.w || ''),
         transactionStatus: range[`U${row}`]?.w || '',
+        financialYear: range[`V${row}`]?.w || ''
       };
     } else if (reportType === 'Annual') {
       return {
@@ -109,8 +111,9 @@ class Excel {
         tdsAmount: range[`P${row}`]?.w || '',
         netPayout: range[`Q${row}`]?.w || '',
         transactionId: range[`R${row}`]?.w || '',
-        transactionDate: range[`S${row}`]?.w || '',
+        transactionDate: new Date( range[`S${row}`]?.w || ''),
         transactionStatus: range[`T${row}`]?.w || '',
+        financialYear: range[`U${row}`]?.w || ''
         };
     }
   }
@@ -127,7 +130,7 @@ class Excel {
         } else if (row.report === 'Annual') {
           filter.year = row.year;
         }
-
+        
         const update = {
           $setOnInsert: {
             empCode: row.empCode,
@@ -148,8 +151,10 @@ class Excel {
             tdsAmount: row.tdsAmount,
             netPayout: row.netPayout,
             transacationId:row.transactionId,
-            transactionDate:new Date(row.transactionDate).getTime(),
-            transactionStatus:row.transactionStatus
+            transactionDate: row.transactionDate,
+            transactionStatus:row.transactionStatus,
+            finacialYear:row.financialYear
+
           }
         };
 

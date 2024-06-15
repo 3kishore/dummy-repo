@@ -19,10 +19,11 @@ const TDSSchema = new Schema({
   annualSpecialCommission: Number,
   tdsAmount: Number,
   netPayout: Number,
-  transacationId:String,
+  transacationId:Number,
   transactionDate:Date,
   transactionStatus:String,
-  report:String
+  report:String,
+  finacialYear:String
 })
 
 module.exports = mongoose.model('AnnualPayout',TDSSchema);
