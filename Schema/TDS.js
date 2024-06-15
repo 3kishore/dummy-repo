@@ -24,6 +24,9 @@ const TDSSchema = new Schema({
   totalCommission: Number,
   tdsAmount: Number,
   netPayout: Number,
+  transacationId:Number,
+  transactionDate:Date,
+  transactionStatus:String,
   report:String
 })
 

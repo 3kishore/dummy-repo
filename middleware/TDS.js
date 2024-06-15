@@ -81,6 +81,9 @@ class Excel {
         Points: range[`N${row}`]?.w || '',
         tdsAmount: range[`T${row}`]?.w || '',
         netPayout: range[`U${row}`]?.w || '',
+        transactionId: range[`v${row}`]?.w || '',
+        transactionDate: range[`w${row}`]?.w || '',
+        transactionStatus: range[`X${row}`]?.w || '',
       };
     } else if (reportType === 'Quarter') {
       return {
@@ -92,6 +95,9 @@ class Excel {
         Points: range[`N${row}`]?.w || '',
         tdsAmount: range[`Q${row}`]?.w || '',
         netPayout: range[`R${row}`]?.w || '',
+        transactionId: range[`S${row}`]?.w || '',
+        transactionDate: range[`T${row}`]?.w || '',
+        transactionStatus: range[`U${row}`]?.w || '',
       };
     } else if (reportType === 'Annual') {
       return {
@@ -102,6 +108,9 @@ class Excel {
         Points: range[`M${row}`]?.w || '',
         tdsAmount: range[`P${row}`]?.w || '',
         netPayout: range[`Q${row}`]?.w || '',
+        transactionId: range[`R${row}`]?.w || '',
+        transactionDate: range[`S${row}`]?.w || '',
+        transactionStatus: range[`T${row}`]?.w || '',
         };
     }
   }
@@ -138,6 +147,9 @@ class Excel {
             report: row.report,
             tdsAmount: row.tdsAmount,
             netPayout: row.netPayout,
+            transacationId:row.transactionId,
+            transactionDate:new Date(row.transactionDate).getTime(),
+            transactionStatus:row.transactionStatus
           }
         };
 
