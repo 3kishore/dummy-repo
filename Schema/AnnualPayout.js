@@ -19,7 +19,7 @@ const TDSSchema = new Schema({
   annualSpecialCommission: Number,
   tdsAmount: Number,
   netPayout: Number,
-  transacationId:Number,
+  transacationId:String,
   transactionDate:Date,
   transactionStatus:String,
   report:String
