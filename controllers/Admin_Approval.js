@@ -81,19 +81,21 @@ router.post('/add-member-by-admin',async(req,res)=>{
         const newEmployee = await Employee.create(req.body)
         const { role: jobTitle, emailId: email, department: dept, firstName } = newEmployee;
 
-        const departmentPrefixes = {
-            'direct-sales-team': 'TNDE',
-            'direct-partner-sales-team': 'TNDP',
-            'channel-partner-sales-team': 'TNCP'
-        };
+        // const departmentPrefixes = {
+        //     'direct-sales-team': 'TNDE',
+        //     'direct-partner-sales-team': 'TNDP',
+        //     'channel-partner-sales-team': 'TNCP'
+        // };
 
-        const departmentPrefix = departmentPrefixes[dept] || 'TNCP';
+        // const departmentPrefix = departmentPrefixes[dept] || 'TNCP';
 
-        const jobPrefix = jobTitle.split('-')
-            .map(part => part.length === 1 ? part.toUpperCase() : part.substring(0, 2).toUpperCase())
-            .join('');
+        // const jobPrefix = jobTitle.split('-')
+        //     .map(part => part.length === 1 ? part.toUpperCase() : part.substring(0, 2).toUpperCase())
+        //     .join('');
 
-        const empCode = `${departmentPrefix}${jobPrefix}${String(number).padStart(4, '0')}`;
+        // const empCode = `${departmentPrefix}${jobPrefix}${String(number).padStart(4, '0')}`;
+
+        const empCode = `SEC${String(number).padStart(7,'0')}`
         newEmployee.password = empCode;
         newEmployee.empCode = empCode;
         const saved_employee = await newEmployee.save()
