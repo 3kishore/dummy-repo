@@ -156,7 +156,7 @@ class Excel {
           report: row.report,
           tdsAmount: row.tdsAmount,
           netPayout: row.netPayout,
-          transactionId: row.transactionId,
+          transacationId: row.transactionId,
           transactionDate: row.transactionDate.getTime() + date,
           transactionStatus: row.transactionStatus,
           financialYear: row.financialYear
