@@ -3,201 +3,194 @@ const Users = require('../Schema/TDS');
 const Quarterly = require('../Schema/QuarterlyPayout');
 const Annual = require('../Schema/AnnualPayout');
 
-const requiredColumn = 'A';
-const maximumRowNumber = 1000000;
-const batchSize = 500; // Adjust batch size as needed
+const REQUIRED_COLUMN = 'A';
+const MAXIMUM_ROW_NUMBER = 1000000;
 
 class Excel {
   async importData(path) {
     try {
       const tasks = [
-        this.importUsers(path, 'Month', this.parseRow.bind(this, 'Month')),
-        this.importUsers(path, 'Quartely', this.parseRow.bind(this, 'Quarter')),
-        this.importUsers(path, 'Annual', this.parseRow.bind(this, 'Annual'))
+        this.importSheetData(path, 'Month', this.parseMonthlyRow, Users),
+        this.importSheetData(path, 'Quartely', this.parseQuarterlyRow, Quarterly),
+        this.importSheetData(path, 'Annual', this.parseAnnualRow, Annual)
       ];
 
       await Promise.all(tasks);
-      console.log('All Records Uploaded finished!................... ^_^');
+      console.log('All records uploaded successfully.');
     } catch (error) {
       console.error('Error uploading data:', error);
     }
   }
 
-  async importUsers(path, sheetName, parseRowFunction) {
+  async importSheetData(path, sheetName, parseRowFunction, Model) {
     try {
-      const xlsx = XLSX.readFile(path);
-      const range = xlsx.Sheets[sheetName];
-      const rows = [];
+      const workbook = XLSX.readFile(path);
+      const worksheet = workbook.Sheets[sheetName];
 
-      for (let row = 2; row <= maximumRowNumber; ++row) {
-        if (!range[`${requiredColumn}${row}`]) {
-          break; // stop if no more data
+      for (let row = 2; row <= MAXIMUM_ROW_NUMBER; row++) {
+        if (!worksheet[`${REQUIRED_COLUMN}${row}`]) {
+          break; // Stop if no more data
         }
 
-        const rowIns = parseRowFunction(range, row);
-        rows.push(rowIns);
-
-        if (rows.length === batchSize) {
-          await this.addUsers(rows);
-          rows.length = 0; // Clear the array
-        }
+        const rowData = parseRowFunction(worksheet, row);
+        await this.saveRow(rowData, Model);
       }
 
-      if (rows.length > 0) {
-        await this.addUsers(rows);
-      }
-
-      console.log(`${sheetName} data uploaded...`);
+      console.log(`${sheetName} data uploaded successfully.`);
     } catch (error) {
       console.error(`Error processing ${sheetName} data:`, error);
     }
   }
 
-  parseRow(reportType, range, row) {
-    const baseData = {
-      empCode: range[`B${row}`].w,
-      employeeName: range[`C${row}`]?.w || '',
-      roleName: range[`D${row}`]?.w || '',
-      department: range[`E${row}`]?.w || '',
-      zone: range[`F${row}`]?.w || '',
-      region: range[`G${row}`]?.w || '',
-      area: range[`H${row}`]?.w || '',
-      payrollType: range[`I${row}`]?.w || '',
-      payrollCompanyName: range[`J${row}`]?.w || '',
-      payrollCompanyEmployeeCode: range[`K${row}`]?.w || '',
-      report: reportType
+  parseMonthlyRow(sheet, row) {
+    return {
+      empCode: sheet[`B${row}`]?.w,
+      employeeName: sheet[`C${row}`]?.w || '',
+      roleName: sheet[`D${row}`]?.w || '',
+      department: sheet[`E${row}`]?.w || '',
+      zone: sheet[`F${row}`]?.w || '',
+      region: sheet[`G${row}`]?.w || '',
+      area: sheet[`H${row}`]?.w || '',
+      payrollType: sheet[`I${row}`]?.w || '',
+      payrollCompanyName: sheet[`J${row}`]?.w || '',
+      payrollCompanyEmployeeCode: sheet[`K${row}`]?.w || '',
+      month: sheet[`L${row}`]?.w || '',
+      monthlyFixedCommissionPerPoint: sheet[`O${row}`]?.w || '',
+      monthlyFixedCommission: sheet[`P${row}`]?.w || '',
+      monthlySpecialCommissionPerPoints: sheet[`Q${row}`]?.w || '',
+      monthlySpecialCommission: sheet[`R${row}`]?.w || '',
+      totalCommission: sheet[`S${row}`]?.w || '',
+      year: sheet[`M${row}`]?.w || '',
+      points: sheet[`N${row}`]?.w || '',
+      tdsAmount: sheet[`T${row}`]?.w || '',
+      netPayout: sheet[`U${row}`]?.w || '',
+      transactionId: sheet[`V${row}`]?.w || '',
+      transactionDate: new Date(sheet[`W${row}`]?.w || ''),
+      transactionStatus: sheet[`X${row}`]?.w || '',
+      report: 'Month',
+      financialYear: sheet[`Y${row}`]?.w || ''
     };
-
-    if (reportType === 'Month') {
-      return {
-        ...baseData,
-        month: range[`L${row}`]?.w || '',
-        monthlyFixedCommissionPerPoint: range[`O${row}`]?.w || '',
-        monthlyFixedCommission: range[`P${row}`]?.w || '',
-        monthlySpecialCommissionPerPoints: range[`Q${row}`]?.w || '',
-        monthlySpecialCommission: range[`R${row}`]?.w || '',
-        totalCommission: range[`S${row}`]?.w || '',
-        year: range[`M${row}`]?.w || '',
-        Points: range[`N${row}`]?.w || '',
-        tdsAmount: range[`T${row}`]?.w || '',
-        netPayout: range[`U${row}`]?.w || '',
-        transactionId: range[`V${row}`]?.w || '',
-        transactionDate: new Date( range[`W${row}`]?.w || ''),
-        transactionStatus: range[`X${row}`]?.w || '',
-        financialYear: range[`Y${row}`]?.w || ''
-      };
-    } else if (reportType === 'Quarter') {
-      return {
-        ...baseData,
-        quarter: range[`L${row}`]?.w || '',
-        quarterlyCommissionPerPoints: range[`O${row}`]?.w || '',
-        quarterlyCommission: range[`P${row}`]?.w || '',
-        year: range[`M${row}`]?.w || '',
-        Points: range[`N${row}`]?.w || '',
-        tdsAmount: range[`Q${row}`]?.w || '',
-        netPayout: range[`R${row}`]?.w || '',
-        transactionId: range[`S${row}`]?.w || '',
-        transactionDate: new Date(range[`T${row}`]?.w || ''),
-        transactionStatus: range[`U${row}`]?.w || '',
-        financialYear: range[`V${row}`]?.w || ''
-      };
-    } else if (reportType === 'Annual') {
-      return {
-        ...baseData,
-        annualCommissionPerPoints: range[`N${row}`]?.w || '',
-        annualSpecialCommission: range[`O${row}`]?.w || '',
-        year: range[`L${row}`]?.w || '',
-        Points: range[`M${row}`]?.w || '',
-        tdsAmount: range[`P${row}`]?.w || '',
-        netPayout: range[`Q${row}`]?.w || '',
-        transactionId: range[`R${row}`]?.w || '',
-        transactionDate: new Date( range[`S${row}`]?.w || ''),
-        transactionStatus: range[`T${row}`]?.w || '',
-        financialYear: range[`U${row}`]?.w || ''
-        };
-    }
   }
 
-  async addUsers(rows) {
+  parseQuarterlyRow(sheet, row) {
+    return {
+      empCode: sheet[`B${row}`]?.w,
+      employeeName: sheet[`C${row}`]?.w || '',
+      roleName: sheet[`D${row}`]?.w || '',
+      department: sheet[`E${row}`]?.w || '',
+      zone: sheet[`F${row}`]?.w || '',
+      region: sheet[`G${row}`]?.w || '',
+      area: sheet[`H${row}`]?.w || '',
+      payrollType: sheet[`I${row}`]?.w || '',
+      payrollCompanyName: sheet[`J${row}`]?.w || '',
+      payrollCompanyEmployeeCode: sheet[`K${row}`]?.w || '',
+      quarter: sheet[`L${row}`]?.w || '',
+      quarterlyCommissionPerPoints: sheet[`O${row}`]?.w || '',
+      quarterlyCommission: sheet[`P${row}`]?.w || '',
+      year: sheet[`M${row}`]?.w || '',
+      points: sheet[`N${row}`]?.w || '',
+      tdsAmount: sheet[`Q${row}`]?.w || '',
+      netPayout: sheet[`R${row}`]?.w || '',
+      transactionId: sheet[`S${row}`]?.w || '',
+      transactionDate: new Date(sheet[`T${row}`]?.w || ''),
+      transactionStatus: sheet[`U${row}`]?.w || '',
+      report: 'Quarter',
+      financialYear: sheet[`V${row}`]?.w || ''
+    };
+  }
+
+  parseAnnualRow(sheet, row) {
+    return {
+      empCode: sheet[`B${row}`]?.w,
+      employeeName: sheet[`C${row}`]?.w || '',
+      roleName: sheet[`D${row}`]?.w || '',
+      department: sheet[`E${row}`]?.w || '',
+      zone: sheet[`F${row}`]?.w || '',
+      region: sheet[`G${row}`]?.w || '',
+      area: sheet[`H${row}`]?.w || '',
+      payrollType: sheet[`I${row}`]?.w || '',
+      payrollCompanyName: sheet[`J${row}`]?.w || '',
+      payrollCompanyEmployeeCode: sheet[`K${row}`]?.w || '',
+      year: sheet[`L${row}`]?.w || '',
+      annualCommissionPerPoints: sheet[`N${row}`]?.w || '',
+      annualSpecialCommission: sheet[`O${row}`]?.w || '',
+      points: sheet[`M${row}`]?.w || '',
+      tdsAmount: sheet[`P${row}`]?.w || '',
+      netPayout: sheet[`Q${row}`]?.w || '',
+      transactionId: sheet[`R${row}`]?.w || '',
+      transactionDate: new Date(sheet[`S${row}`]?.w || ''),
+      transactionStatus: sheet[`T${row}`]?.w || '',
+      report: 'Annual',
+      financialYear: sheet[`U${row}`]?.w || ''
+    };
+  }
+
+  async saveRow(row, Model) {
     try {
-      const bulkOps = rows.map(row => {
-        const filter = { empCode: row.empCode, report: row.report };
-        
-        if (row.report === 'Month') {
-          filter.month = row.month;
-        } else if (row.report === 'Quarter') {
-          filter.quarter = row.quarter;
-        } else if (row.report === 'Annual') {
-          filter.year = row.year;
-        }
-        
-        const update = {
-          $setOnInsert: {
-            empCode: row.empCode,
-            employeeName: row.employeeName,
-            roleName: row.roleName,
-            department: row.department,
-            zone: row.zone,
-            region: row.region,
-            area: row.area,
-            points: row.Points,
-            payoutType: row.payrollType,
-            payrollCompanyName: row.payrollCompanyName,
-            payrollCompanyEmployeeCode: row.payrollCompanyEmployeeCode,
-            month: row.month,
-            year: row.year,
-            quarter: row.quarter,
-            report: row.report,
-            tdsAmount: row.tdsAmount,
-            netPayout: row.netPayout,
-            transacationId:row.transactionId,
-            transactionDate: row.transactionDate,
-            transactionStatus:row.transactionStatus,
-            finacialYear:row.financialYear
+      row.transactionDate
+      let date = 1000 * 60 * 60 * 24
+      //date.setDate(date+1)
+     
+      const filter = { empCode: row.empCode, report: row.report };
 
-          }
-        };
-
-        if (row.report === 'Month') {
-          Object.assign(update.$setOnInsert, {
-            monthlyCommissionPerPoints: row.monthlyFixedCommissionPerPoint,
-            monthlyFixedCommission: row.monthlyFixedCommission,
-            monthlySpecialCommissionPerPoints: row.monthlySpecialCommissionPerPoints,
-            monthlySpecialCommission: row.monthlySpecialCommission,
-            totalCommission: row.totalCommission
-          });
-        } else if (row.report === 'Quarter') {
-          Object.assign(update.$setOnInsert, {
-            quarterlyCommissionPerPoints: row.quarterlyCommissionPerPoints,
-            quarterlyCommission: row.quarterlyCommission
-          });
-        } else if (row.report === 'Annual') {
-          Object.assign(update.$setOnInsert, {
-            annualCommissionPerPoints: row.annualCommissionPerPoints,
-            annualSpecialCommission: row.annualSpecialCommission
-          });
-        }
-
-        return {
-          updateOne: {
-            filter,
-            update,
-            upsert: true
-          }
-        };
-      });
-
-      if (rows[0].report === 'Month') {
-        await Users.bulkWrite(bulkOps);
-      } else if (rows[0].report === 'Quarter') {
-        await Quarterly.bulkWrite(bulkOps);
-      } else if (rows[0].report === 'Annual') {
-        await Annual.bulkWrite(bulkOps);
+      if (row.report === 'Month') {
+        filter.month = row.month;
+      } else if (row.report === 'Quarter') {
+        filter.quarter = row.quarter;
+      } else if (row.report === 'Annual') {
+        filter.year = row.year;
       }
 
-      console.log('Bulk write completed.');
+      const update = {
+        $set: {
+          empCode: row.empCode,
+          employeeName: row.employeeName,
+          roleName: row.roleName,
+          department: row.department,
+          zone: row.zone,
+          region: row.region,
+          area: row.area,
+          points: row.points,
+          payoutType: row.payrollType,
+          payrollCompanyName: row.payrollCompanyName,
+          payrollCompanyEmployeeCode: row.payrollCompanyEmployeeCode,
+          month: row.month,
+          year: row.year,
+          quarter: row.quarter,
+          report: row.report,
+          tdsAmount: row.tdsAmount,
+          netPayout: row.netPayout,
+          transactionId: row.transactionId,
+          transactionDate: row.transactionDate.getTime() + date,
+          transactionStatus: row.transactionStatus,
+          financialYear: row.financialYear
+        }
+      };
+
+      if (row.report === 'Month') {
+        Object.assign(update.$set, {
+          monthlyCommissionPerPoints: row.monthlyFixedCommissionPerPoint,
+          monthlyFixedCommission: row.monthlyFixedCommission,
+          monthlySpecialCommissionPerPoints: row.monthlySpecialCommissionPerPoints,
+          monthlySpecialCommission: row.monthlySpecialCommission,
+          totalCommission: row.totalCommission
+        });
+      } else if (row.report === 'Quarter') {
+        Object.assign(update.$set, {
+          quarterlyCommissionPerPoints: row.quarterlyCommissionPerPoints,
+          quarterlyCommission: row.quarterlyCommission
+        });
+      } else if (row.report === 'Annual') {
+        Object.assign(update.$set, {
+          annualCommissionPerPoints: row.annualCommissionPerPoints,
+          annualSpecialCommission: row.annualSpecialCommission
+        });
+      }
+
+      await Model.updateOne(filter, update, { upsert: true });
+      
     } catch (error) {
-      console.error('Error in bulk write:', error);
+      console.error('Error saving row:', error);
     }
   }
 }
