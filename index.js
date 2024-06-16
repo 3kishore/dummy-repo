@@ -13,7 +13,7 @@ const tdsController = require('./controllers/TDS');
 const viedoCoontroller = require('./controllers/Video');
 const helpAndSupport = require('./controllers/HelpAndSupport')
 
-const allowedOrigins = ['https://pimaths-sales-monitoring-dashboard.vercel.app', 'http://localhost:3000', 'http://localhost:4900'];
+const allowedOrigins = ['https://pimaths-sales-monitoring-dashboard.vercel.app', 'https://sales-mathtutee.vercel.app', 'http://localhost:3000', 'http://localhost:4900'];
 
 // Configure CORS options
 const corsOptions = {
