@@ -29,7 +29,7 @@ router.post('/authorize', async (req, res) => {
 
     try {
         const user = await Users.findOne({ empCode:empCode }).exec();
-       // const name = user.firstName
+        //const name = user.firstName
          
         let jwtSecretKey = process.env.JWT_SECRET_KEY;
         
