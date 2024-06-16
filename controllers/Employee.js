@@ -9,7 +9,8 @@ const admin = require('../Schema/Admin')
 
 const sequence = require('../middleware/CounterSequence');
 const Orders = require('../Schema/Orders');
-const EmailDetails = require('../Email/EmailDetails')
+const EmailDetails = require('../Email/EmailDetails');
+const Points = require('../Schema/Points');
 
 
 // router.post('/approve-and-member',async(req,res)=>{
@@ -467,29 +468,68 @@ router.post('/GetOrderByMonth',authGuard,async(req, res)=>{
 })
 
 router.post('/get-my-direct-team',async (req,res)=>{
-  try{
-      const refferals = await Employee.find({referalId:req.body.empCode},{"_id":0,"empCode":1,"firstName":1,"mobileNo":1,"area":1,"zone":1,"state":1,"Points":1,"TeamPoints":1,"role":1,"region":1,"department":1}).exec();
+  try {
+    const today = new Date();
+    const nextDate = new Date() 
+    nextDate.setDate(nextDate.getDate() - 1)
+    const refferals = await Employee.find(
+      { referalId: req.body.empCode },
+      {
+        _id: 0,
+        empCode: 1,
+        firstName: 1,
+        mobileNo: 1,
+        area: 1,
+        zone: 1,
+        state: 1,
+        Points: 1,
+        TeamPoints: 1,
+        role: 1,
+        region: 1,
+        department: 1,
+      }
+    ).exec();
 
-      const formattedResult = refferals.map(record => ({
-          empCode: record.empCode,
-          name:record.firstName,
-          mobileNo:record.mobileNo,
-          area:record.area,
-          zone:record.zone,
-          region: record.region,
-          state:record.state,
-          role:record.role,
-          department:record.department,
-          
-          points:Number(record.Points),
-          teamPoints: Number(record.TeamPoints),
-      }));
+    const empCodes = refferals.map((record) => record.empCode);
 
-      res.status(200).json({"status":true,"message":"success","content":formattedResult})
-  }
-  catch (error) {
-      res.status(500).json({"status":false,"message":"Failed","content":null})
-      console.log(error)
+    const points = await Points.aggregate([
+      {
+        $match: {
+          empCode: { $in: empCodes },
+          orderDate: { $gte: nextDate, $lt: today },
+        },
+      },
+      {
+        $group: {
+          _id: '$empCode',
+          totalPoints: { $sum: '$points' },
+        },
+      },
+    ]);
+
+    const pointsMap = points.reduce((acc, cur) => {
+      acc[cur._id] = cur.totalPoints;
+      return acc;
+    }, {});
+
+    const formattedResult = refferals.map((record) => ({
+      empCode: record.empCode,
+      name: record.firstName,
+      mobileNo: record.mobileNo,
+      area: record.area,
+      zone: record.zone,
+      region: record.region,
+      state: record.state,
+      role: record.role,
+      department: record.department,
+      points: pointsMap[record.empCode] || 0,
+      teamPoints: Number(record.TeamPoints)
+    }));
+
+    res.status(200).json({ status: true, message: 'success', content: formattedResult });
+  } catch (error) {
+    res.status(500).json({ status: false, message: 'Failed', content: null });
+    console.log(error);
   }
 })
 
