@@ -8,7 +8,7 @@ const MAXIMUM_ROW_NUMBER = 1000000;
 
 class Excel {
   async importData(path) {
-    try {
+   
       const tasks = [
         this.importSheetData(path, 'Month', this.parseMonthlyRow, Users),
         this.importSheetData(path, 'Quartely', this.parseQuarterlyRow, Quarterly),
@@ -17,13 +17,11 @@ class Excel {
 
       await Promise.all(tasks);
       console.log('All records uploaded successfully.');
-    } catch (error) {
-      console.error('Error uploading data:', error);
-    }
+    
   }
 
   async importSheetData(path, sheetName, parseRowFunction, Model) {
-    try {
+   
       const workbook = XLSX.readFile(path);
       const worksheet = workbook.Sheets[sheetName];
 
@@ -37,9 +35,7 @@ class Excel {
       }
 
       console.log(`${sheetName} data uploaded successfully.`);
-    } catch (error) {
-      console.error(`Error processing ${sheetName} data:`, error);
-    }
+    
   }
 
   parseMonthlyRow(sheet, row) {
@@ -126,7 +122,7 @@ class Excel {
   }
 
   async saveRow(row, Model) {
-    try {
+    
       row.transactionDate
       let date = 1000 * 60 * 60 * 24
       //date.setDate(date+1)
@@ -189,9 +185,7 @@ class Excel {
 
       await Model.updateOne(filter, update, { upsert: true });
       
-    } catch (error) {
-      console.error('Error saving row:', error);
-    }
+    
   }
 }
 
