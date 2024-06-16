@@ -18,10 +18,10 @@ const Employee = new Schema({
   empCode: { type: String, default:''},
   password:{ type: String, default:''},
   state: { type: String, default: 'Tamil-Nadu' },
-  emailId: { type: String, default: '' },
+  emailId: { type: String, default: '',unique: true},
   firstName: { type: String, default: '' },
   lastName: { type: String, default: '' },
-  mobileNo: { type: String, default: '' },
+  mobileNo: { type: String, default: '',unique: true },
   department: { type: String, default: '' },
   role: { type: String, default: '' },
   payRoll: { type: String, default: '' },
@@ -52,6 +52,8 @@ const Employee = new Schema({
     postOffice: { type: String, default: '' }
   },
   aadharDetail: {
+    number: { type: String, default: '',unique: true },
+    name: { type: String, default: '' },
     address: { type: String, default: '' },
     district: { type: String, default: '' },
     state: { type: String, default: '' },
@@ -59,7 +61,7 @@ const Employee = new Schema({
     postOffice: { type: String, default: '' }
   },
   panDetail: {
-    number: { type: String, default: '' },
+    number: { type: String, default: '',unique: true },
     name: { type: String, default: '' },
     proof: { type: String, default: '' }
   },
@@ -68,7 +70,7 @@ const Employee = new Schema({
     branchName: { type: String, default: '' },
     ifscCode: { type: String, default: '' },
     accountType: { type: String, default: '' },
-    accountNo: { type: String, default: '' },
+    accountNo: { type: String, default: '' ,unique: true},
     nameAsPerBook: { type: String, default: '' },
     proof: { type: String, default: '' }
   },
