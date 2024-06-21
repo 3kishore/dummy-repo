@@ -139,7 +139,7 @@ router.post('/approve-and-add-member',authGuard, async (req, res) => {
       
   } catch (error) {
       console.error(error);
-      res.status(500).json({ status: false, message: "Failed", content: null });
+      res.status(500).json({ status: false, message: "Failed", content: error });
   }
 });
 router.post('/addOrder',authGuard,async(req,res)=>{
@@ -467,7 +467,7 @@ router.post('/GetOrderByMonth',authGuard,async(req, res)=>{
     
 })
 
-router.post('/get-my-direct-team',async (req,res)=>{
+router.post('/get-my-direct-team',authGuard,async (req,res)=>{
   try {
     const today = new Date();
     const nextDate = new Date() 

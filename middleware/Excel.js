@@ -1,6 +1,7 @@
 const XLSX = require('xlsx');
 const Users = require('../Schema/Orders');
 const PointsSchema = require('../Schema/Points');
+const Employee = require('../Schema/Employee')
 
 const SHEET_NAME = 'Orders';
 const REQUIRED_COLUMN = 'A';
@@ -106,11 +107,42 @@ class Excel {
         empCode: rowIns.empCode
       };
 
+      const result = await Employee.findOne({"empCode": rowIns.empCode})
+      console.log(result.referalId)
+      var refferId = ''
+
+      if(result.length == 0){
+        const pointsDoc = {
+          orderNo: rowIns.orderNo,
+          empCode: rowIns.empCode,
+          orderDate: orderDate,
+          points: points,
+          referalId : result.referalId,
+          orderMonth: orderDate.getMonth() + 1,
+          orderQuarter: quarter,
+          orderYear: orderDate.getFullYear(),
+          orderTotal: rowIns.orderTotal,
+          discountAmount: rowIns.discountAmount,
+          netAmount: rowIns.netAmount,
+          courseName: rowIns.courseName,
+        };
+        await PointsSchema.create(pointsDoc);
+
+      }
+      console.log(refferId)
       const pointsDoc = {
         orderNo: rowIns.orderNo,
         empCode: rowIns.empCode,
         orderDate: orderDate,
         points: points,
+        referalId :  result.referalId,
+        orderMonth: orderDate.getMonth() + 1,
+        orderQuarter: quarter,
+        orderYear: orderDate.getFullYear(),
+        orderTotal: rowIns.orderTotal,
+        discountAmount: rowIns.discountAmount,
+        netAmount: rowIns.netAmount,
+        courseName: rowIns.courseName,
       };
 
       // Insert user and points data

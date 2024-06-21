@@ -8,7 +8,8 @@ const Orders = require('../Schema/Orders');
 const sequence = require('../middleware/CounterSequence');
 const Mail = require('../Email/Mail')
 const EmailDetails = require('../Email/EmailDetails')
-
+const Points  = require('../Schema/Points')
+const runDate = require('../Schema/lastRundate')
 
 router.post('/request-to-add-member',authGuard,async(req,res)=>{
     try{
@@ -144,10 +145,13 @@ router.post('/upload-sales-data',async(req,res)=>{
         const filePath = req.body.filePath
         await excel.importData(filePath).then(()=>{
             TeamPoints()
+            CalculatePoints()
+            
             res.status(200).json({"status":true,"message":"success","content":null})
         }).catch(err=>{
             res.status(500).json({"status":false,"message":"Failed","content":err.message})
         });
+       // await CalculatePoints()
        // await referalId()
      
         
@@ -262,99 +266,87 @@ const TeamPoints = async() => {
 };
 
 
-router.post('/my-Team-sales-points', async (req, res) => {
-    try {
-        const date = new Date(req.body.date);
-        const nextDate = new Date(date);
-        nextDate.setDate(nextDate.getDate() + 1);
 
-        // Step 1: Aggregate orders to calculate total points for each employee
-        const aggregatedOrders = await Orders.aggregate([
-            {
-                $group: {
-                    _id: { empCode: "$empCode" },
-                    totalPoints: { $sum: "$points" }
-                }
-            }
-        ]);
 
-        // Format the result
-        const formattedResult = aggregatedOrders.map(record => ({
-            empCode: record._id.empCode,
-            MyPoints: Number(record.totalPoints),
-            TeamPoints: 0
-        }));
+const CalculatePoints = async () => {
+  try {
+    // Fetch the last run date
+    let lastRunDateRecord = await runDate.findOne({ _id: 'LastRunDate' }).exec();
+    let date;
 
-        // Step 2: Update individual points for each employee
-        const updateEmployeePointsPromises = formattedResult.map(record => 
-            Employee.updateOne(
-                { empCode: record.empCode },
-                { $set: { Points: record.MyPoints } }
-            )
-        );
-        await Promise.all(updateEmployeePointsPromises);
-        console.log(formattedResult)
-        // Step 3: Update team points for each employee based on referrals
-        for (const record of formattedResult) {
-            let emp = record.empCode;
-            const referEmpSet = new Set();
+    if (!lastRunDateRecord) {
+      date = new Date(2024, 0, 1);
+      await runDate.create({ _id: 'LastRunDate', lastRundate: date });
+    } else {
+      date = lastRunDateRecord.lastRundate;
+    }
 
-            while (true) {
-                const output = await Employee.aggregate([
-                    {
-                        $lookup: {
-                            from: 'employees',
-                            localField: 'referalId',
-                            foreignField: 'empCode',
-                            as: 'referedPerson'
-                        }
-                    },
-                    { $unwind: '$referedPerson' },
-                    { $match: { empCode: emp } },
-                    {
-                        $project: {
-                            referalId: 1
-                        }
-                    }
-                ]);
+    console.log(date);
 
-                if (output.length === 0) break;
+    // Fetch all distinct referalIds from the Points collection with createDate greater than or equal to the last run date
+    const distinctReferralIds = await Points.find({ createDate: { $gte: date } }).distinct('referalId').exec();
 
-                emp = output[0].referalId;
+    // Use a set to keep track of processed referralIds to avoid duplicates
+    const processedReferralIds = new Set();
 
-                if (!referEmpSet.has(emp)) {
-                    referEmpSet.add(emp);
+    // Loop through each distinct referralId
+    for (let initialReferralId of distinctReferralIds) {
+      let currentReferralId = initialReferralId;
 
-                    const teamPointsResults = await Employee.aggregate([
-                        { $match: { referalId: emp } },
-                        {
-                            $group: {
-                                _id: "$referalId",
-                                totalPoints: { $sum: "$Points" },
-                                totalTeamPoints: { $sum: "$TeamPoints" }
-                            }
-                        }
-                    ]);
+      // Continue processing while there are more referral IDs to follow
+      while (currentReferralId) {
+        // Skip already processed referral IDs
+        if (processedReferralIds.has(currentReferralId)) break;
 
-                    console.log(teamPointsResults)
+        // Fetch points for the current referralId
+        const pointsRecords = await Points.find({ referalId: currentReferralId, createDate: { $gte: date } }).exec();
 
-                    if (teamPointsResults.length > 0) {
-                        const teamPointsData = teamPointsResults[0];
-                        await Employee.updateOne(
-                            { empCode: teamPointsData._id },
-                            { $set: { TeamPoints: teamPointsData.totalPoints + teamPointsData.totalTeamPoints } }
-                        );
-                    }
-                }
-            }
+        // Fetch the employee associated with the current referralId
+        const employee = await Employee.findOne({ empCode: currentReferralId }).exec();
+
+        // If there are no points records or no employee, break the loop
+        if (!pointsRecords.length || !employee) break;
+
+        // Process each point record individually
+        for (const record of pointsRecords) {
+          // Check if the record already exists in the Points collection
+          const existingRecord = await Points.findOne({ orderNo: record.orderNo, empCode: currentReferralId }).exec();
+
+          if (!existingRecord) {
+            const formattedResult = {
+              orderNo: record.orderNo,
+              empCode: currentReferralId,
+              orderDate: record.orderDate,
+              points: record.points,
+              referalId: employee.referalId,
+              orderMonth: record.orderMonth,
+              orderQuarter:record.orderQuarter,
+              orderYear:record.orderYear,
+              orderTotal:record.orderTotal,
+              discountAmount:record.discountAmount,
+              netAmount:record.netAmount,
+              courseName:record.courseName,
+            };
+
+            // Insert the new record into the Points collection
+            await Points.create(formattedResult);
+          }
         }
 
-        res.status(200).json({ "status": true, "message": "success", "content": null });
-    } catch (err) {
-        res.status(500).json({ "status": false, "message": "Failed", "content": null });
-        console.error(err);
+        // Mark current referral ID as processed
+        processedReferralIds.add(currentReferralId);
+
+        // Move to the next referral ID
+        currentReferralId = employee.referalId;
+      }
     }
-});
+
+    // Update the last run date to the current date
+    await runDate.updateOne({ _id: 'LastRunDate' }, { $set: { lastRundate: new Date() } });
+  } catch (error) {
+    console.error('Error processing points:', error);
+  }
+};
 
 
 
