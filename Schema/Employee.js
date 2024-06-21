@@ -53,7 +53,7 @@ const Employee = new Schema({
     postOffice: { type: String, default: '' }
   },
   aadharDetail: {
-    number: { type: String, default: '',unique: true },
+    number: { type: String, default: '', },
     name: { type: String, default: '' },
     address: { type: String, default: '' },
     district: { type: String, default: '' },
@@ -62,7 +62,7 @@ const Employee = new Schema({
     postOffice: { type: String, default: '' }
   },
   panDetail: {
-    number: { type: String, default: '' ,unique: true},
+    number: { type: String, default: '' ,},
     name: { type: String, default: '' },
     proof: { type: String, default: '' }
   },
@@ -71,7 +71,7 @@ const Employee = new Schema({
     branchName: { type: String, default: '' },
     ifscCode: { type: String, default: '' },
     accountType: { type: String, default: '' },
-    accountNo: { type: String, default: '' ,unique: true},
+    accountNo: { type: String, default: '' ,},
     nameAsPerBook: { type: String, default: '' },
     proof: { type: String, default: '' }
   },
