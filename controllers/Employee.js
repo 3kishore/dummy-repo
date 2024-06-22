@@ -523,7 +523,7 @@ router.post('/get-my-direct-team',authGuard,async (req,res)=>{
       role: record.role,
       department: record.department,
       points: pointsMap[record.empCode] || 0,
-      teamPoints: Number(record.TeamPoints)
+      teamPoints: 0
     }));
 
     res.status(200).json({ status: true, message: 'success', content: formattedResult });
